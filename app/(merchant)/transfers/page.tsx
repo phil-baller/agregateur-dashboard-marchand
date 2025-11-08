@@ -2,7 +2,6 @@
 
 import { useEffect, Suspense } from "react";
 import { useTransfersStore } from "@/stores/transfers.store";
-import { useAuthStore } from "@/stores/auth.store";
 import { TransfersTable } from "@/components/shared/transfers-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,20 +11,15 @@ import Link from "next/link";
 
 export default function TransfersPage() {
   const { transfers, isLoading, fetchTransfers } = useTransfersStore();
-  const { isAuthenticated, isHydrated } = useAuthStore();
 
   useEffect(() => {
-    // Only fetch data when user is authenticated and store is hydrated
-    if (isHydrated && isAuthenticated) {
-      fetchTransfers();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isHydrated, isAuthenticated]);
+    fetchTransfers();
+  }, [fetchTransfers]);
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-6 p-6 animate-fade-in">
       {/* Header Section */}
-      <div className="flex flex-col items-center justify-center gap-4 rounded-lg bg-green-50 p-8 text-center">
+      <div className="flex flex-col items-center justify-center gap-4 rounded-lg bg-green-50 p-8 text-center animate-slide-up">
         <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-green-100">
           <div className="flex h-12 w-12 items-center justify-center rounded bg-green-200">
             <span className="text-2xl font-bold text-green-700">$</span>
@@ -38,7 +32,7 @@ export default function TransfersPage() {
         </p>
         <div className="flex gap-4">
           <Button asChild size="lg">
-            <Link href="/merchant/transfers/create">
+            <Link href="/transfers/create">
               <Plus className="mr-2 h-4 w-4" />
               Create new transfer
             </Link>
@@ -113,7 +107,7 @@ export default function TransfersPage() {
             <Suspense
               fallback={<DataTableSkeleton columnCount={6} rowCount={5} />}
             >
-              <TransfersTable data={Array.isArray(transfers) ? transfers : []} isLoading={isLoading} />
+              <TransfersTable data={transfers} isLoading={isLoading} />
             </Suspense>
           )}
         </CardContent>

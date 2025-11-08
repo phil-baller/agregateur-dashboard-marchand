@@ -23,9 +23,6 @@ export default function AdminCountriesPage() {
     fetchCountries();
   }, [fetchCountries]);
 
-  // Ensure countries is always an array
-  const countriesList = Array.isArray(countries) ? countries : [];
-
   const handleToggleTransactions = async (
     id: string,
     enabled: boolean
@@ -68,13 +65,9 @@ export default function AdminCountriesPage() {
             <div className="flex items-center justify-center py-8">
               <div className="text-muted-foreground">Loading countries...</div>
             </div>
-          ) : countriesList.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <div className="text-muted-foreground">No countries found</div>
-            </div>
           ) : (
             <div className="space-y-4">
-              {countriesList.map((country) => (
+              {countries.map((country) => (
                 <div
                   key={country.id}
                   className="flex items-center justify-between rounded-lg border p-4"

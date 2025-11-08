@@ -1,6 +1,7 @@
 "use client"
 
-import * as React from "react"
+import { useEffect, type ComponentProps } from "react"
+import { useRouter } from "next/navigation"
 import {
   IconDashboard,
   IconUsers,
@@ -18,6 +19,7 @@ import { useAuthStore, type UserRole } from "@/stores/auth.store"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
+import { OrganizationSwitcher } from "@/components/organization-switcher"
 import {
   Sidebar,
   SidebarContent,
@@ -115,10 +117,18 @@ const getNavigationForRole = (role: UserRole | null) => {
   }
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user, getRole } = useAuthStore()
+export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
+  const router = useRouter()
+  const { user, getRole, isAuthenticated } = useAuthStore()
   const role = getRole() || "CLIENT"
   const navigation = getNavigationForRole(role)
+
+  // Redirect to login if user is not authenticated
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      router.push("/login")
+    }
+  }, [isAuthenticated, user, router])
 
   const userData = user
     ? {
@@ -139,10 +149,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
+              className="data-[slot=sidebar-menu-button]:p-1.5!"
             >
               <a href="/">
-                <IconInnerShadowTop className="!size-5" />
+                <IconInnerShadowTop className="size-5!" />
                 <span className="text-base font-semibold">FastPay</span>
               </a>
             </SidebarMenuButton>
@@ -150,6 +160,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        {role === "MERCHANT" && (
+          <div className="px-2 py-2 border-b">
+            <OrganizationSwitcher align="start" fullWidth />
+          </div>
+        )}
         <NavMain items={navigation.navMain} />
         <NavSecondary items={navigation.navSecondary} className="mt-auto" />
       </SidebarContent>

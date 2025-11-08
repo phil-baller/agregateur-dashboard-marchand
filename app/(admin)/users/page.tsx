@@ -25,9 +25,8 @@ export default function AdminUsersPage() {
       const currentUser = await usersController.getCurrentUser();
       setUsers([currentUser]);
     } catch (error) {
-      // Error is already handled by API base (toast shown, logged to console)
-      // Set users to empty array to show empty UI
-      setUsers([]);
+      toast.error("Failed to fetch users");
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
@@ -40,8 +39,7 @@ export default function AdminUsersPage() {
         toast.success("User deleted successfully");
         fetchUsers();
       } catch (error) {
-        // Error is already handled by API base (toast shown, logged to console)
-        // No need to show duplicate toast or handle error state
+        toast.error("Failed to delete user");
       }
     }
   };

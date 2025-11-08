@@ -52,12 +52,12 @@ export default function RegisterPage() {
             <div className="flex h-10 w-10 items-center justify-center rounded bg-primary">
               <span className="text-xl font-bold text-primary-foreground">N</span>
             </div>
-            <span className="text-xl font-bold text-primary">Notch Pay</span>
+            <span className="text-xl font-bold text-primary">FastPay</span>
           </div>
 
           <div className="mb-8">
             <h1 className="mb-2 text-3xl font-bold">
-              Create your Notch Pay account
+              Create your FastPay account
             </h1>
           </div>
 
@@ -115,21 +115,25 @@ export default function RegisterPage() {
                       htmlFor="terms"
                       className="text-sm font-normal cursor-pointer"
                     >
-                      By signing up, you agree to the{" "}
+                      <span>By signing up, you agree</span>
                       <Link
                         href="/terms"
-                        className="font-semibold text-primary hover:underline"
+                        className="font-semibold text-primary hover:underline whitespace-nowrap"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         Terms of Use
-                      </Link>{" "}
-                      and{" "}
+                      </Link>
+                      <span> </span>
+                      <span className="text-muted-foreground">and</span>
+                      <span> </span>
                       <Link
                         href="/privacy"
-                        className="font-semibold text-primary hover:underline"
+                        className="font-semibold text-primary hover:underline whitespace-nowrap"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         Privacy Policy
                       </Link>
-                      .
+                      <span>.</span>
                     </Label>
                   </div>
 
@@ -187,7 +191,7 @@ export default function RegisterPage() {
 
       {/* Right Side - Marketing Content */}
       <div className="hidden w-1/2 bg-primary lg:flex lg:flex-col lg:justify-between lg:p-12">
-        <div>
+        <div className="my-auto">
           <h2 className="mb-4 text-3xl font-bold text-primary-foreground">
             The payment solution that adapts to your growth
           </h2>
@@ -250,32 +254,6 @@ export default function RegisterPage() {
                   A dedicated team to support you every step of the way
                 </p>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <h2 className="mb-8 text-2xl font-bold text-primary-foreground">
-            They trust us
-          </h2>
-          <div className="flex gap-8">
-            <div className="flex items-center gap-2 text-primary-foreground">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-500">
-                <span className="text-xl font-bold">G</span>
-              </div>
-              <span>Genuka</span>
-            </div>
-            <div className="flex items-center gap-2 text-primary-foreground">
-              <div className="flex h-12 w-12 items-center justify-center rounded bg-blue-500">
-                <span className="text-xl">🛒</span>
-              </div>
-              <span>Laravel Shopper</span>
-            </div>
-            <div className="flex items-center gap-2 text-primary-foreground">
-              <div className="flex h-12 w-12 items-center justify-center rounded bg-red-500">
-                <span className="text-xl">L</span>
-              </div>
-              <span>Laravel CAMEROON</span>
             </div>
           </div>
         </div>

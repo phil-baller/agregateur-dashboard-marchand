@@ -1,4 +1,5 @@
 import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api/base";
+import { getCurrentOrganisationId } from "@/lib/api/config";
 import type {
   NewCreatePaymentDto,
   NewCreateDirectPaymentDto,
@@ -10,29 +11,62 @@ export const paymentsController = {
   createPayment: async (
     data: NewCreatePaymentDto
   ): Promise<{ message: string }> => {
-    return apiPost("/api/paiements/new-paiement", data);
+    const organisationId = getCurrentOrganisationId();
+    const payload: NewCreatePaymentDto = {
+      ...data,
+      organisation_id: data.organisation_id || organisationId || undefined,
+    };
+    return apiPost("/api/paiements/new-paiement", payload);
   },
 
   createDirectPayment: async (
     data: NewCreateDirectPaymentDto
   ): Promise<{ message: string }> => {
-    return apiPost("/api/paiements/initialize-direct-paiement", data);
+    const organisationId = getCurrentOrganisationId();
+    const payload: NewCreateDirectPaymentDto = {
+      ...data,
+      organisation_id: data.organisation_id || organisationId || undefined,
+    };
+    return apiPost("/api/paiements/initialize-direct-paiement", payload);
   },
 
   getAllPayments: async (params?: {
     page?: number;
     size?: number;
+    organisation_id?: string;
   }): Promise<unknown> => {
-    return apiGet("/api/paiements", params);
+    const organisationId = getCurrentOrganisationId();
+    const queryParams: Record<string, unknown> = {};
+    
+    if (params?.page) queryParams.page = params.page;
+    if (params?.size) queryParams.size = params.size;
+    if (params?.organisation_id || organisationId) {
+      queryParams.organisation_id = params?.organisation_id || organisationId;
+    }
+    
+    // Only pass organisation_id, page, and size (per_page)
+    // Do not include date fields or filter fields by default
+    return apiGet("/api/paiements", queryParams);
   },
 
   filterPayments: async (
     data: FilterDto,
-    params?: { page?: number; size?: number }
+    params?: { page?: number; size?: number; organisation_id?: string }
   ): Promise<unknown> => {
-    const queryParams = params
+    const organisationId = getCurrentOrganisationId();
+    const queryParamsObj = {
+      ...params,
+      organisation_id: params?.organisation_id || organisationId || undefined,
+    };
+    // Remove undefined values
+    Object.keys(queryParamsObj).forEach(
+      (key) =>
+        queryParamsObj[key as keyof typeof queryParamsObj] === undefined &&
+        delete queryParamsObj[key as keyof typeof queryParamsObj]
+    );
+    const queryParams = Object.keys(queryParamsObj).length > 0
       ? `?${new URLSearchParams(
-          Object.entries(params).reduce((acc, [key, value]) => {
+          Object.entries(queryParamsObj).reduce((acc, [key, value]) => {
             if (value !== undefined && value !== null) {
               acc[key] = String(value);
             }

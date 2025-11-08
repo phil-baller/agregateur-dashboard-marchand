@@ -27,7 +27,10 @@ export function DataTable<TData>({
 }: DataTableProps<TData>) {
   return (
     <div
-      className={cn("flex w-full flex-col gap-2.5 overflow-auto", className)}
+      className={cn(
+        "flex w-full flex-col gap-2.5 overflow-auto animate-fade-in",
+        className
+      )}
       {...props}
     >
       {children}
@@ -57,10 +60,15 @@ export function DataTable<TData>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map((row, index) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="animate-slide-up transition-colors duration-150"
+                  style={{
+                    animationDelay: `${index * 0.02}s`,
+                    animationFillMode: "both",
+                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell

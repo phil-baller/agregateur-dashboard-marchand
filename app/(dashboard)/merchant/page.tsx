@@ -1,23 +1,152 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CreditCard, ArrowRight, Zap, DollarSign } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAnalyticsStore } from "@/stores/analytics.store";
+import { useAuthStore } from "@/stores/auth.store";
+import {
+  CreditCard,
+  ArrowRight,
+  Zap,
+  DollarSign,
+  TrendingUp,
+  CheckCircle2,
+  XCircle,
+  Receipt,
+} from "lucide-react";
 import Link from "next/link";
 
+const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "XOF",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+const formatNumber = (num: number): string => {
+  return new Intl.NumberFormat("en-US").format(num);
+};
+
 export default function MerchantPage() {
+  const { overview, isLoading, fetchOverview } = useAnalyticsStore();
+  const { isAuthenticated, isHydrated } = useAuthStore();
+
+  useEffect(() => {
+    // Only fetch data when user is authenticated and store is hydrated
+    if (isHydrated && isAuthenticated) {
+      fetchOverview();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHydrated, isAuthenticated]);
+
+  const analyticsCards = [
+    {
+      title: "Total Transactions",
+      value: overview?.totalTransactions ?? 0,
+      description: "All transactions processed",
+      icon: Receipt,
+      iconColor: "text-blue-600",
+      bgColor: "bg-blue-100",
+      format: formatNumber,
+    },
+    {
+      title: "Total Amount",
+      value: overview?.totalAmount ?? 0,
+      description: "Total revenue generated",
+      icon: DollarSign,
+      iconColor: "text-green-600",
+      bgColor: "bg-green-100",
+      format: formatCurrency,
+    },
+    {
+      title: "Successful Transactions",
+      value: overview?.successfulTransactions ?? 0,
+      description: "Completed transactions",
+      icon: CheckCircle2,
+      iconColor: "text-green-600",
+      bgColor: "bg-green-100",
+      format: formatNumber,
+    },
+    {
+      title: "Failed Transactions",
+      value: overview?.failedTransactions ?? 0,
+      description: "Transactions that failed",
+      icon: XCircle,
+      iconColor: "text-red-600",
+      bgColor: "bg-red-100",
+      format: formatNumber,
+    },
+    {
+      title: "Commissions",
+      value: overview?.commissions ?? 0,
+      description: "Total commissions earned",
+      icon: TrendingUp,
+      iconColor: "text-purple-600",
+      bgColor: "bg-purple-100",
+      format: formatCurrency,
+    },
+  ];
+
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-6 p-6 animate-fade-in">
+      <div className="flex flex-col gap-2 animate-slide-up">
         <h1 className="text-3xl font-bold">Merchant Dashboard</h1>
         <p className="text-muted-foreground">
           Manage payments, transfers, and quick links
         </p>
       </div>
 
+      {/* Analytics Section */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
+        {analyticsCards.map((card, index) => {
+          const Icon = card.icon;
+          return (
+            <Card
+              key={card.title}
+              className="animate-slide-up"
+              style={{
+                animationDelay: `${index * 0.05}s`,
+                animationFillMode: "both",
+              }}
+            >
+              <CardHeader>
+                <div
+                  className={`mb-2 flex h-10 w-10 items-center justify-center rounded ${card.bgColor}`}
+                >
+                  <Icon className={`h-5 w-5 ${card.iconColor}`} />
+                </div>
+                <CardDescription>{card.title}</CardDescription>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-24" />
+                ) : (
+                  <CardTitle className="text-2xl font-semibold tabular-nums">
+                    {card.format(card.value)}
+                  </CardTitle>
+                )}
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  {card.description}
+                </p>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Action Cards Section */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Card>
+        <Card
+          className="animate-slide-up"
+          style={{
+            animationDelay: "0.05s",
+            animationFillMode: "both",
+          }}
+        >
           <CardHeader>
             <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-green-100">
               <CreditCard className="h-5 w-5 text-green-600" />
@@ -37,7 +166,13 @@ export default function MerchantPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card
+          className="animate-slide-up"
+          style={{
+            animationDelay: "0.1s",
+            animationFillMode: "both",
+          }}
+        >
           <CardHeader>
             <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-blue-100">
               <DollarSign className="h-5 w-5 text-blue-600" />
@@ -57,7 +192,13 @@ export default function MerchantPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card
+          className="animate-slide-up"
+          style={{
+            animationDelay: "0.15s",
+            animationFillMode: "both",
+          }}
+        >
           <CardHeader>
             <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-purple-100">
               <Zap className="h-5 w-5 text-purple-600" />

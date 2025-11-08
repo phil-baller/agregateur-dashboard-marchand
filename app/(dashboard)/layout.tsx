@@ -1,64 +1,56 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore, type UserRole } from "@/stores/auth.store";
+import { useOrganisationsStore } from "@/stores/organisations.store";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
+import { OrganizationOverlay } from "@/components/organization-overlay";
 import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar";
+import { PageLoader } from "@/components/ui/page-loader";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const { user, getRole } = useAuthStore();
+  const { user, isHydrated, isAuthenticated } = useAuthStore();
+  const {
+    organisations,
+    organisation,
+    hasOrganisation,
+    fetchMyOrganisations,
+    isLoading: orgLoading,
+  } = useOrganisationsStore();
+  const role = user?.role as UserRole | undefined;
 
+  // Fetch organizations for merchant users
   useEffect(() => {
-    const role = getRole();
-    
-    // If no user, redirect to login
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-
-    // Role-based route protection
-    if (pathname?.startsWith("/admin")) {
-      if (role !== "ADMIN") {
-        router.push("/");
-        return;
-      }
-    } else if (pathname?.startsWith("/merchant")) {
-      if (role !== "MERCHANT") {
-        router.push("/");
-        return;
-      }
-    } else if (pathname?.startsWith("/dashboard")) {
-      if (role !== "CLIENT") {
-        router.push("/");
-        return;
+    // Only fetch when authenticated, hydrated, and user is a merchant
+    if (isHydrated && isAuthenticated && role === "MERCHANT") {
+      // Only fetch if we don't have organizations and we're not already loading
+      if (organisations.length === 0 && !orgLoading) {
+        fetchMyOrganisations();
       }
     }
-  }, [user, pathname, router, getRole]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHydrated, isAuthenticated, role, organisations.length, orgLoading]);
 
-  const role = getRole();
-  
-  // Check if user has access to current route
-  const hasAccess = 
-    (pathname?.startsWith("/admin") && role === "ADMIN") ||
-    (pathname?.startsWith("/merchant") && role === "MERCHANT") ||
-    (pathname?.startsWith("/dashboard") && role === "CLIENT");
-
-  // Show nothing while checking or if no access (but allow home page)
-  if (!hasAccess && pathname !== "/" && pathname) {
-    return null;
+  // Show loading state while hydrating or fetching organization
+  if (!isHydrated || (role === "MERCHANT" && orgLoading && !organisation)) {
+    return <PageLoader text="Loading dashboard..." />;
   }
+
+  // Check if merchant user has organization
+  // Only show overlay if: user is merchant, not loading, and definitely doesn't have organization
+  const isMerchant = role === "MERCHANT";
+  const showOverlay = isMerchant && !orgLoading && !hasOrganisation() && !organisation;
+
+  // AuthProvider handles routing, so if we reach here, user is authenticated
+  // and has access to the current route
 
   return (
     <SidebarProvider
@@ -78,6 +70,7 @@ export default function DashboardLayout({
           </div>
         </div>
       </SidebarInset>
+      {showOverlay && <OrganizationOverlay />}
     </SidebarProvider>
   );
 }

@@ -1,4 +1,5 @@
 import { apiGet } from "@/lib/api/base";
+import { getCurrentOrganisationId } from "@/lib/api/config";
 import type {
   AnalyticsOverviewResponseDto,
   AnalyticsGraphDataResponseDto,
@@ -6,17 +7,63 @@ import type {
 } from "@/types/api";
 
 export const analyticsController = {
-  getOverview: async (): Promise<AnalyticsOverviewResponseDto> => {
-    return apiGet<AnalyticsOverviewResponseDto>("/api/analytics/overview");
+  getOverview: async (params?: {
+    organisation_id?: string;
+  }): Promise<AnalyticsOverviewResponseDto> => {
+    const organisationId = getCurrentOrganisationId();
+    const queryParams = {
+      ...params,
+      organisation_id: params?.organisation_id || organisationId || undefined,
+    };
+    // Remove undefined values
+    Object.keys(queryParams).forEach(
+      (key) =>
+        queryParams[key as keyof typeof queryParams] === undefined &&
+        delete queryParams[key as keyof typeof queryParams]
+    );
+    return apiGet<AnalyticsOverviewResponseDto>(
+      "/api/analytics/overview",
+      Object.keys(queryParams).length > 0 ? queryParams : undefined
+    );
   },
 
-  getGraphData: async (): Promise<AnalyticsGraphDataResponseDto> => {
-    return apiGet<AnalyticsGraphDataResponseDto>("/api/analytics/graph");
+  getGraphData: async (params?: {
+    organisation_id?: string;
+  }): Promise<AnalyticsGraphDataResponseDto> => {
+    const organisationId = getCurrentOrganisationId();
+    const queryParams = {
+      ...params,
+      organisation_id: params?.organisation_id || organisationId || undefined,
+    };
+    // Remove undefined values
+    Object.keys(queryParams).forEach(
+      (key) =>
+        queryParams[key as keyof typeof queryParams] === undefined &&
+        delete queryParams[key as keyof typeof queryParams]
+    );
+    return apiGet<AnalyticsGraphDataResponseDto>(
+      "/api/analytics/graph",
+      Object.keys(queryParams).length > 0 ? queryParams : undefined
+    );
   },
 
-  getTopBeneficiaries: async (): Promise<AnalyticsTopBeneficiariesResponseDto> => {
+  getTopBeneficiaries: async (params?: {
+    organisation_id?: string;
+  }): Promise<AnalyticsTopBeneficiariesResponseDto> => {
+    const organisationId = getCurrentOrganisationId();
+    const queryParams = {
+      ...params,
+      organisation_id: params?.organisation_id || organisationId || undefined,
+    };
+    // Remove undefined values
+    Object.keys(queryParams).forEach(
+      (key) =>
+        queryParams[key as keyof typeof queryParams] === undefined &&
+        delete queryParams[key as keyof typeof queryParams]
+    );
     return apiGet<AnalyticsTopBeneficiariesResponseDto>(
-      "/api/analytics/top-beneficiaries"
+      "/api/analytics/top-beneficiaries",
+      Object.keys(queryParams).length > 0 ? queryParams : undefined
     );
   },
 };

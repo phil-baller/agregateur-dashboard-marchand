@@ -18,6 +18,24 @@ export const removeAuthToken = (): void => {
 };
 
 /**
+ * Get current organization ID from organizations store or localStorage
+ * @returns Organization ID if available, null otherwise
+ */
+export const getCurrentOrganisationId = (): string | null => {
+  if (typeof window === "undefined") return null;
+  
+  try {
+    // Try to get from organizations store
+    const orgStoreModule = require("@/stores/organisations.store");
+    const state = orgStoreModule.useOrganisationsStore.getState();
+    return state.currentOrganisationId || state.organisation?.id || null;
+  } catch {
+    // Fallback to localStorage
+    return localStorage.getItem("current_organisation_id");
+  }
+};
+
+/**
  * Get auth headers with token from auth store
  * @param token - Optional token to use. If not provided, will fetch from auth store
  * @returns Headers with Authorization Bearer token if available

@@ -21,13 +21,13 @@ export const useMobileServicesStore = create<MobileServicesState>(
       set({ isLoading: true, error: null });
       try {
         const services = await mobileServicesController.getAllServices();
-        set({ services, isLoading: false });
+        // Ensure services is always an array
+        const servicesArray = Array.isArray(services) ? services : [];
+        set({ services: servicesArray, isLoading: false });
       } catch (error) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch mobile services";
-        set({ isLoading: false, error: errorMessage });
+        // Error is already handled by API base (toast shown, logged to console)
+        // Set services to empty array on error
+        set({ services: [], isLoading: false, error: null });
       }
     },
 

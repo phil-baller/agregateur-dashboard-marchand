@@ -28,6 +28,7 @@ interface TransfersState {
   initializeTransfer: (data: CreateTransfertDto) => Promise<void>;
   setSelectedTransfer: (transfer: Transfer | null) => void;
   clearError: () => void;
+  reset: () => void;
 }
 
 export const useTransfersStore = create<TransfersState>((set, get) => ({
@@ -45,12 +46,15 @@ export const useTransfersStore = create<TransfersState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await transfersController.getAllTransfers(params);
-      const data = Array.isArray(response)
-        ? response
-        : (response as { data?: Transfer[]; transfers?: Transfer[] })?.data ||
-          (response as { data?: Transfer[]; transfers?: Transfer[] })
-            ?.transfers ||
-          [];
+      // Ensure we always get an array
+      let data: Transfer[] = [];
+      if (Array.isArray(response)) {
+        data = response;
+      } else if (response && typeof response === "object") {
+        data = (response as { data?: Transfer[]; transfers?: Transfer[] })?.data ||
+               (response as { data?: Transfer[]; transfers?: Transfer[] })?.transfers ||
+               [];
+      }
       set({
         transfers: data,
         isLoading: false,
@@ -61,9 +65,9 @@ export const useTransfersStore = create<TransfersState>((set, get) => ({
         },
       });
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch transfers";
-      set({ isLoading: false, error: errorMessage });
+      // Error is already handled by API base (toast shown, logged to console)
+      // Set transfers to empty array on error
+      set({ transfers: [], isLoading: false, error: null });
     }
   },
 
@@ -104,6 +108,20 @@ export const useTransfersStore = create<TransfersState>((set, get) => ({
 
   clearError: () => {
     set({ error: null });
+  },
+
+  reset: () => {
+    set({
+      transfers: [],
+      selectedTransfer: null,
+      isLoading: false,
+      error: null,
+      pagination: {
+        page: 1,
+        size: 10,
+        total: 0,
+      },
+    });
   },
 }));
 

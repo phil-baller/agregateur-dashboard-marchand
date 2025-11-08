@@ -1,14 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth.store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AnimatePresence, motion } from "motion/react";
 import { toast } from "sonner";
 import Link from "next/link";
+
+const words = [
+  "growth",
+  "services",
+  "scale",
+  "team",
+  "business",
+  "needs",
+  "success",
+  "vision",
+];
+
+const AnimatedText = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % words.length);
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="text-3xl md:text-5xl lg:text-6xl font-bold text-primary-foreground animate-slide-up" style={{ animationDelay: "0.1s" }}>
+      <div className="flex flex-wrap items-center justify-start gap-2">
+        <span>The payment solution</span>
+        <span>that adapts to your</span>
+        <div className="relative h-[1.2em] inline-flex items-center min-w-[180px] justify-start">
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={currentIndex}
+              initial={{ opacity: 0, y: 30, scale: 0.8, rotate: -5 }}
+              animate={{ opacity: 1, y: 0, scale: 1, rotate: 2 }}
+              exit={{ opacity: 0, y: -30, scale: 0.8, rotate: 5 }}
+              transition={{ 
+                duration: 0.6, 
+                ease: [0.16, 1, 0.3, 1]
+              }}
+              className="absolute left-0 inline-block text-primary-foreground px-4 py-2"
+            >
+              {/* Background gradient with glow effect */}
+              <span className="absolute inset-0 bg-linear-to-r from-primary-foreground/20 via-primary-foreground/10 to-primary-foreground/20 rounded-lg blur-xl -z-10" />
+              <span className="absolute inset-0 bg-linear-to-r from-primary-foreground/15 to-transparent rounded-lg -z-10" />
+              {/* Text with slight glow */}
+              <span className="relative inline-block drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+                {words[currentIndex]}
+              </span>
+            </motion.span>
+          </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function LoginPage() {
   const router = useRouter();
@@ -32,63 +88,28 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Left Side - Branding */}
-      <div className="hidden w-1/2 bg-primary lg:flex lg:flex-col lg:justify-between lg:p-12">
-        <div>
-          <h2 className="mb-8 text-2xl font-bold text-primary-foreground">
-            They trust us
-          </h2>
-          <div className="flex gap-8">
-            <div className="flex items-center gap-2 text-primary-foreground">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-500">
-                <span className="text-xl font-bold">G</span>
-              </div>
-              <span>Genuka</span>
-            </div>
-            <div className="flex items-center gap-2 text-primary-foreground">
-              <div className="flex h-12 w-12 items-center justify-center rounded bg-blue-500">
-                <span className="text-xl">🛒</span>
-              </div>
-              <span>Laravel Shopper</span>
-            </div>
-            <div className="flex items-center gap-2 text-primary-foreground">
-              <div className="flex h-12 w-12 items-center justify-center rounded bg-red-500">
-                <span className="text-xl">L</span>
-              </div>
-              <span>Laravel CAMEROON</span>
+      {/* Left Side - Animated Background */}
+      <div className="hidden w-1/2 bg-primary lg:flex lg:items-center lg:justify-center lg:relative lg:overflow-hidden">
+        {/* Animated gradient background */}
+        <div className="absolute inset-0 bg-linear-to-br from-primary via-primary/90 to-primary/80 animate-pulse" />
+        
+        {/* Floating orbs */}
+        <div className="absolute top-20 left-20 w-72 h-72 bg-primary-foreground/10 rounded-full blur-3xl animate-[float_6s_ease-in-out_infinite]" />
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-primary-foreground/10 rounded-full blur-3xl animate-[float_8s_ease-in-out_infinite_reverse]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary-foreground/5 rounded-full blur-3xl animate-[float_7s_ease-in-out_infinite]" />
+        
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-size-[50px_50px] opacity-50" />
+        
+        {/* Content */}
+        <div className="relative z-10 text-center px-12 animate-fade-in">
+          <div className="mb-8 flex justify-start">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 animate-scale-in">
+              <span className="text-3xl font-bold text-primary-foreground">FP</span>
             </div>
           </div>
-        </div>
-        <div>
-          <h2 className="mb-4 text-2xl font-bold text-primary-foreground">
-            Our customers and their experience
-          </h2>
-          <Card>
-            <CardContent className="p-6">
-              <div className="mb-4 flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <span key={i} className="text-yellow-400">
-                    ★
-                  </span>
-                ))}
-              </div>
-              <p className="mb-4 italic">
-                "Integration was very straightforward, and customer support is
-                exceptional. Notch Pay is truly a partner for growth."
-              </p>
-              <div className="flex items-center gap-2">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                  <span>SK</span>
-                </div>
-                <div>
-                  <div className="font-semibold">Sarah Kamdem</div>
-                  <div className="text-sm text-muted-foreground">
-                    Fondatrice, Digital Academy
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+
+          <AnimatedText />
         </div>
       </div>
 
@@ -99,7 +120,7 @@ export default function LoginPage() {
             <div className="flex h-10 w-10 items-center justify-center rounded bg-primary">
               <span className="text-xl font-bold text-primary-foreground">N</span>
             </div>
-            <span className="text-xl font-bold text-primary">Notch Pay</span>
+            <span className="text-xl font-bold text-primary">FastPay</span>
           </div>
 
           <div className="mb-8">

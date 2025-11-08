@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useMobileServicesStore } from "@/stores/mobile-services.store";
-import { useAuthStore } from "@/stores/auth.store";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,18 +15,10 @@ export default function AdminServicesPage() {
     fetchServices,
     enableOrDisableService,
   } = useMobileServicesStore();
-  const { isAuthenticated, isHydrated } = useAuthStore();
 
   useEffect(() => {
-    // Only fetch data when user is authenticated and store is hydrated
-    if (isHydrated && isAuthenticated) {
-      fetchServices();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isHydrated, isAuthenticated]);
-
-  // Ensure services is always an array
-  const servicesList = Array.isArray(services) ? services : [];
+    fetchServices();
+  }, [fetchServices]);
 
   const handleToggle = async (id: string, currentStatus: boolean) => {
     try {
@@ -54,13 +45,9 @@ export default function AdminServicesPage() {
             <div className="flex items-center justify-center py-8">
               <div className="text-muted-foreground">Loading services...</div>
             </div>
-          ) : servicesList.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <div className="text-muted-foreground">No services found</div>
-            </div>
           ) : (
             <div className="space-y-4">
-              {servicesList.map((service) => (
+              {services.map((service) => (
                 <div
                   key={service.id}
                   className="flex items-center justify-between rounded-lg border p-4"

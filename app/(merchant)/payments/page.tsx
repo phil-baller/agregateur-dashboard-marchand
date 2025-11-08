@@ -1,46 +1,44 @@
 "use client";
 
 import { useEffect, Suspense } from "react";
-import { useTransfersStore } from "@/stores/transfers.store";
-import { useAuthStore } from "@/stores/auth.store";
-import { TransfersTable } from "@/components/shared/transfers-table";
+import { usePaymentsStore } from "@/stores/payments.store";
+import { PaymentsTable } from "@/components/shared/payments-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
-import { Plus, Building2, Smartphone, RefreshCw, Shield } from "lucide-react";
+import { Plus, Zap, RefreshCw, CreditCard, Clock } from "lucide-react";
 import Link from "next/link";
 
-export default function TransfersPage() {
-  const { transfers, isLoading, fetchTransfers } = useTransfersStore();
-  const { isAuthenticated, isHydrated } = useAuthStore();
+export default function PaymentsPage() {
+  const { payments, isLoading, fetchPayments, deletePayment } = usePaymentsStore();
 
   useEffect(() => {
-    // Only fetch data when user is authenticated and store is hydrated
-    if (isHydrated && isAuthenticated) {
-      fetchTransfers();
+    fetchPayments();
+  }, [fetchPayments]);
+
+  const handleDelete = async (id: string) => {
+    if (confirm("Are you sure you want to delete this payment?")) {
+      await deletePayment(id);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isHydrated, isAuthenticated]);
+  };
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="flex flex-col gap-6 p-6 animate-fade-in">
       {/* Header Section */}
-      <div className="flex flex-col items-center justify-center gap-4 rounded-lg bg-green-50 p-8 text-center">
+      <div className="flex flex-col items-center justify-center gap-4 rounded-lg bg-green-50 p-8 text-center animate-slide-up">
         <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-green-100">
-          <div className="flex h-12 w-12 items-center justify-center rounded bg-green-200">
-            <span className="text-2xl font-bold text-green-700">$</span>
-          </div>
+          <Zap className="h-8 w-8 text-green-600" />
         </div>
-        <h1 className="text-3xl font-bold">Start making withdrawals</h1>
+        <h1 className="text-3xl font-bold">Start receiving payments</h1>
         <p className="max-w-2xl text-muted-foreground">
-          Transfer your income to your bank or mobile money account. Automate
-          your withdrawals via our API.
+          Create your first payment link and start accepting payments from your
+          customers in just a few minutes.
         </p>
         <div className="flex gap-4">
           <Button asChild size="lg">
-            <Link href="/merchant/transfers/create">
+            <Link href="/payments/create">
               <Plus className="mr-2 h-4 w-4" />
-              Create new transfer
+              Create payment link
             </Link>
           </Button>
           <Button variant="outline" size="lg">
@@ -51,69 +49,75 @@ export default function TransfersPage() {
 
       {/* Features Section */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-blue-100">
-              <Building2 className="h-5 w-5 text-blue-600" />
-            </div>
-            <CardTitle>Bank transfer</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CardDescription>To all bank accounts</CardDescription>
-          </CardContent>
-        </Card>
-
-        <Card>
+        <Card className="animate-slide-up stagger-1">
           <CardHeader>
             <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-green-100">
-              <Smartphone className="h-5 w-5 text-green-600" />
+              <Zap className="h-5 w-5 text-green-600" />
             </div>
-            <CardTitle>Mobile Money</CardTitle>
+            <CardTitle>Instant payment</CardTitle>
           </CardHeader>
           <CardContent>
-            <CardDescription>Retraits instantanés</CardDescription>
+            <CardDescription>Receive payments immediately</CardDescription>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="animate-slide-up stagger-2">
+          <CardHeader>
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-blue-100">
+              <RefreshCw className="h-5 w-5 text-blue-600" />
+            </div>
+            <CardTitle>Real-time tracking</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CardDescription>Monitor all your transactions</CardDescription>
+          </CardContent>
+        </Card>
+
+        <Card className="animate-slide-up stagger-3">
           <CardHeader>
             <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-purple-100">
-              <RefreshCw className="h-5 w-5 text-purple-600" />
+              <CreditCard className="h-5 w-5 text-purple-600" />
             </div>
-            <CardTitle>Automatic withdrawals</CardTitle>
+            <CardTitle>Multiple methods</CardTitle>
           </CardHeader>
           <CardContent>
-            <CardDescription>Schedule your transfers</CardDescription>
+            <CardDescription>
+              Mobile Money, Cards, Bank Transfers, Digital wallet
+            </CardDescription>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="animate-slide-up stagger-4">
           <CardHeader>
             <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-orange-100">
-              <Shield className="h-5 w-5 text-orange-600" />
+              <Clock className="h-5 w-5 text-orange-600" />
             </div>
-            <CardTitle>Maximum safety</CardTitle>
+            <CardTitle>Detailed history</CardTitle>
           </CardHeader>
           <CardContent>
-            <CardDescription>Secure transactions</CardDescription>
+            <CardDescription>Access all your data</CardDescription>
           </CardContent>
         </Card>
       </div>
 
-      {/* Transfers Table */}
-      <Card>
+      {/* Payments Table */}
+      <Card className="animate-slide-up stagger-5">
         <CardHeader>
-          <CardTitle>Recent Transfers</CardTitle>
-          <CardDescription>View and manage your transfer transactions</CardDescription>
+          <CardTitle>Recent Payments</CardTitle>
+          <CardDescription>View and manage your payment transactions</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <DataTableSkeleton columnCount={6} rowCount={5} />
+            <DataTableSkeleton columnCount={7} rowCount={5} />
           ) : (
             <Suspense
-              fallback={<DataTableSkeleton columnCount={6} rowCount={5} />}
+              fallback={<DataTableSkeleton columnCount={7} rowCount={5} />}
             >
-              <TransfersTable data={Array.isArray(transfers) ? transfers : []} isLoading={isLoading} />
+              <PaymentsTable
+                data={payments}
+                onDelete={handleDelete}
+                isLoading={isLoading}
+              />
             </Suspense>
           )}
         </CardContent>
@@ -122,9 +126,9 @@ export default function TransfersPage() {
       {/* Help Section */}
       <div className="flex flex-col gap-4 rounded-lg border p-6 md:flex-row md:items-center md:justify-between">
         <div>
-          <h3 className="text-lg font-semibold">Need help with transfers?</h3>
+          <h3 className="text-lg font-semibold">Need help getting started?</h3>
           <p className="text-muted-foreground">
-            Find out how to set up and optimize your withdrawals.
+            Consult our guides and documentation to get started quickly.
           </p>
           <Link href="/support" className="mt-2 text-green-600 hover:underline">
             Contact support →
@@ -133,11 +137,11 @@ export default function TransfersPage() {
         <div className="grid grid-cols-2 gap-4">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Withdrawal guide</CardTitle>
+              <CardTitle className="text-sm">Getting started guide</CardTitle>
             </CardHeader>
             <CardContent>
               <CardDescription className="text-xs">
-                All about transfers
+                Learn the basics step by step
               </CardDescription>
             </CardContent>
           </Card>
@@ -147,17 +151,17 @@ export default function TransfersPage() {
             </CardHeader>
             <CardContent>
               <CardDescription className="text-xs">
-                Integrate automatic withdrawals
+                Explore our integration guides
               </CardDescription>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Schedule transfers</CardTitle>
+              <CardTitle className="text-sm">Video tutorials</CardTitle>
             </CardHeader>
             <CardContent>
               <CardDescription className="text-xs">
-                Set up recurring withdrawals
+                Watch step-by-step guides
               </CardDescription>
             </CardContent>
           </Card>
@@ -167,7 +171,7 @@ export default function TransfersPage() {
             </CardHeader>
             <CardContent>
               <CardDescription className="text-xs">
-                Common questions about transfers
+                Find answers to common questions
               </CardDescription>
             </CardContent>
           </Card>

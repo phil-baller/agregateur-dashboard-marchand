@@ -22,11 +22,13 @@ export const useCountriesStore = create<CountriesState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const countries = await countriesController.getAllCountries();
-      set({ countries, isLoading: false });
+      // Ensure countries is always an array
+      const countriesArray = Array.isArray(countries) ? countries : [];
+      set({ countries: countriesArray, isLoading: false });
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch countries";
-      set({ isLoading: false, error: errorMessage });
+      // Error is already handled by API base (toast shown, logged to console)
+      // Set countries to empty array on error
+      set({ countries: [], isLoading: false, error: null });
     }
   },
 
