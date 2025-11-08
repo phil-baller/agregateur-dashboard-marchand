@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import * as React from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/data-table/data-table";
 import { useDataTable } from "@/hooks/use-data-table";
@@ -17,18 +18,30 @@ interface Payment {
   id: string;
   reference?: string;
   amount: number;
-  description: string;
+  description?: string;
   status: string;
-  transaction_type: string;
+  transaction_type?: string;
   createdAt?: string;
+  organisation?: {
+    id: string;
+    libelle?: string;
+    description?: string;
+    [key: string]: unknown;
+  };
   [key: string]: unknown;
 }
 
 interface PaymentsTableProps {
   data: Payment[];
   onView?: (id: string) => void;
-  onDelete?: (id: string) => void;
+  onDelete?: (id: string, reference?: string) => void;
   isLoading?: boolean;
+  pagination?: {
+    page: number;
+    size: number;
+    total: number;
+  };
+  onPaginationChange?: (page: number, size: number) => void;
 }
 
 const statusColors: Record<string, string> = {
@@ -45,6 +58,8 @@ export const PaymentsTable = ({
   onView,
   onDelete,
   isLoading = false,
+  pagination,
+  onPaginationChange,
 }: PaymentsTableProps) => {
   const columns = useMemo<ColumnDef<Payment>[]>(
     () => [
@@ -77,7 +92,7 @@ export const PaymentsTable = ({
         header: "Description",
         cell: ({ row }) => (
           <div className="max-w-[200px] truncate">
-            {row.original.description}
+            {row.original.description || row.original.organisation?.description || "-"}
           </div>
         ),
       },
@@ -101,7 +116,7 @@ export const PaymentsTable = ({
         header: "Type",
         cell: ({ row }) => (
           <Badge variant="secondary">
-            {row.original.transaction_type || "PAYMENT"}
+            {row.original.transaction_type || "PAYMENT_LINK"}
           </Badge>
         ),
       },
@@ -133,7 +148,7 @@ export const PaymentsTable = ({
               )}
               {onDelete && (
                 <DropdownMenuItem
-                  onClick={() => onDelete(row.original.id)}
+                  onClick={() => onDelete(row.original.id, row.original.reference)}
                   className="text-red-600"
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
@@ -148,11 +163,47 @@ export const PaymentsTable = ({
     [onView, onDelete]
   );
 
+  const pageCount = pagination
+    ? Math.ceil(pagination.total / pagination.size)
+    : Math.ceil(data.length / 10);
+
   const { table } = useDataTable({
     data,
     columns,
-    pageCount: Math.ceil(data.length / 10),
+    pageCount,
+    initialState: {
+      pagination: pagination
+        ? {
+            pageIndex: pagination.page - 1,
+            pageSize: pagination.size,
+          }
+        : undefined,
+    },
   });
+
+  // Handle pagination changes - use a ref to track previous values
+  const prevPaginationRef = React.useRef({
+    pageIndex: pagination ? pagination.page - 1 : 0,
+    pageSize: pagination?.size || 10,
+  });
+  
+  React.useEffect(() => {
+    if (!onPaginationChange || !pagination) return;
+    
+    const currentPageIndex = table.getState().pagination.pageIndex;
+    const currentPageSize = table.getState().pagination.pageSize;
+    const prevPageIndex = prevPaginationRef.current.pageIndex;
+    const prevPageSize = prevPaginationRef.current.pageSize;
+    
+    // Only trigger if pagination actually changed and doesn't match current pagination state
+    if (
+      (currentPageIndex !== prevPageIndex || currentPageSize !== prevPageSize) &&
+      (currentPageIndex + 1 !== pagination.page || currentPageSize !== pagination.size)
+    ) {
+      onPaginationChange(currentPageIndex + 1, currentPageSize);
+      prevPaginationRef.current = { pageIndex: currentPageIndex, pageSize: currentPageSize };
+    }
+  }, [table.getState().pagination.pageIndex, table.getState().pagination.pageSize]);
 
   return <DataTable table={table} />;
 };

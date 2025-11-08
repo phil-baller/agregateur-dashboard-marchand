@@ -10,10 +10,16 @@ interface Payment {
   id: string;
   reference?: string;
   amount: number;
-  description: string;
+  description?: string;
   status: string;
-  transaction_type: string;
+  transaction_type?: string;
   createdAt?: string;
+  organisation?: {
+    id: string;
+    libelle?: string;
+    description?: string;
+    [key: string]: unknown;
+  };
   [key: string]: unknown;
 }
 
@@ -61,22 +67,44 @@ export const usePaymentsStore = create<PaymentsState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await paymentsController.getAllPayments(params);
-      // Ensure we always get an array
+      // API response structure: { paiements: { content: Payment[], page: number, size: number, total: number } }
       let data: Payment[] = [];
-      if (Array.isArray(response)) {
+      let total = 0;
+      let page = params?.page || 1;
+      let size = params?.size || 10;
+
+      if (response && typeof response === "object") {
+        const paiements = (response as { paiements?: { content?: Payment[]; page?: number; size?: number; total?: number } })?.paiements;
+        if (paiements) {
+          data = Array.isArray(paiements.content) ? paiements.content : [];
+          total = paiements.total || 0;
+          page = paiements.page || page;
+          size = paiements.size || size;
+        } else if (Array.isArray(response)) {
+          // Fallback: if response is directly an array
+          data = response;
+          total = data.length;
+        } else if ((response as { data?: Payment[]; payments?: Payment[] })?.data) {
+          // Fallback: check for data property
+          data = (response as { data?: Payment[] })?.data || [];
+          total = data.length;
+        } else if ((response as { data?: Payment[]; payments?: Payment[] })?.payments) {
+          // Fallback: check for payments property
+          data = (response as { payments?: Payment[] })?.payments || [];
+          total = data.length;
+        }
+      } else if (Array.isArray(response)) {
         data = response;
-      } else if (response && typeof response === "object") {
-        data = (response as { data?: Payment[]; payments?: Payment[] })?.data || 
-               (response as { data?: Payment[]; payments?: Payment[] })?.payments || 
-               [];
+        total = data.length;
       }
+
       set({
         payments: data,
         isLoading: false,
         pagination: {
-          page: params?.page || 1,
-          size: params?.size || 10,
-          total: (response as { total?: number })?.total || data.length,
+          page,
+          size,
+          total,
         },
       });
     } catch (error) {
@@ -120,14 +148,41 @@ export const usePaymentsStore = create<PaymentsState>((set, get) => ({
     set({ isLoading: true, error: null, filters });
     try {
       const response = await paymentsController.filterPayments(filters, params);
-      const data = Array.isArray(response) ? response : (response as { data?: Payment[]; payments?: Payment[] })?.data || (response as { data?: Payment[]; payments?: Payment[] })?.payments || [];
+      // API response structure: { paiements: { content: Payment[], page: number, size: number, total: number } }
+      let data: Payment[] = [];
+      let total = 0;
+      let page = params?.page || 1;
+      let size = params?.size || 10;
+
+      if (response && typeof response === "object") {
+        const paiements = (response as { paiements?: { content?: Payment[]; page?: number; size?: number; total?: number } })?.paiements;
+        if (paiements) {
+          data = Array.isArray(paiements.content) ? paiements.content : [];
+          total = paiements.total || 0;
+          page = paiements.page || page;
+          size = paiements.size || size;
+        } else if (Array.isArray(response)) {
+          data = response;
+          total = data.length;
+        } else if ((response as { data?: Payment[]; payments?: Payment[] })?.data) {
+          data = (response as { data?: Payment[] })?.data || [];
+          total = data.length;
+        } else if ((response as { data?: Payment[]; payments?: Payment[] })?.payments) {
+          data = (response as { payments?: Payment[] })?.payments || [];
+          total = data.length;
+        }
+      } else if (Array.isArray(response)) {
+        data = response;
+        total = data.length;
+      }
+
       set({
         payments: data,
         isLoading: false,
         pagination: {
-          page: params?.page || 1,
-          size: params?.size || 10,
-          total: (response as { total?: number })?.total || data.length,
+          page,
+          size,
+          total,
         },
       });
     } catch (error) {

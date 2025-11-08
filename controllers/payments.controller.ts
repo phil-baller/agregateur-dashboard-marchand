@@ -36,16 +36,16 @@ export const paymentsController = {
     organisation_id?: string;
   }): Promise<unknown> => {
     const organisationId = getCurrentOrganisationId();
-    const queryParams = {
-      ...params,
-      organisation_id: params?.organisation_id || organisationId || undefined,
-    };
-    // Remove undefined values
-    Object.keys(queryParams).forEach(
-      (key) =>
-        queryParams[key as keyof typeof queryParams] === undefined &&
-        delete queryParams[key as keyof typeof queryParams]
-    );
+    const queryParams: Record<string, unknown> = {};
+    
+    if (params?.page) queryParams.page = params.page;
+    if (params?.size) queryParams.size = params.size;
+    if (params?.organisation_id || organisationId) {
+      queryParams.organisation_id = params?.organisation_id || organisationId;
+    }
+    
+    // Only pass organisation_id, page, and size (per_page)
+    // Do not include date fields or filter fields by default
     return apiGet("/api/paiements", queryParams);
   },
 

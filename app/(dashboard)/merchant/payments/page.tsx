@@ -1,30 +1,170 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
+import { useEffect, Suspense, useState } from "react";
 import { usePaymentsStore } from "@/stores/payments.store";
+import { useMobileServicesStore } from "@/stores/mobile-services.store";
 import { PaymentsTable } from "@/components/shared/payments-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
-import { Plus, Zap, RefreshCw, CreditCard, Clock } from "lucide-react";
+import { Plus, Zap, RefreshCw, CreditCard, Clock, Link2, Settings, Phone, Receipt, CheckCircle2, XCircle } from "lucide-react";
 import Link from "next/link";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import type { NewCreateDirectPaymentDto } from "@/types/api";
+
+interface DirectPaymentFormData {
+  amount: number;
+  description: string;
+  phone: string;
+  service_mobile_code?: string;
+}
 
 export default function PaymentsPage() {
-  const { payments, isLoading, fetchPayments, deletePayment } = usePaymentsStore();
+  const { payments, isLoading, pagination, fetchPayments, deletePayment, createDirectPayment } = usePaymentsStore();
+  const { services, fetchServices } = useMobileServicesStore();
+  const [isDirectPaymentOpen, setIsDirectPaymentOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [paymentToDelete, setPaymentToDelete] = useState<{ id: string; reference?: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isCreatingDirectPayment, setIsCreatingDirectPayment] = useState(false);
+
+  const directPaymentForm = useForm<DirectPaymentFormData>({
+    defaultValues: {
+      amount: 0,
+      description: "",
+      phone: "",
+      service_mobile_code: "",
+    },
+  });
 
   useEffect(() => {
-    fetchPayments();
-  }, [fetchPayments]);
+    fetchPayments({ page: 1, size: 10 });
+    fetchServices();
+  }, [fetchPayments, fetchServices]);
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this payment?")) {
-      await deletePayment(id);
+  const handleDeleteClick = (id: string, reference?: string) => {
+    setPaymentToDelete({ id, reference });
+    setDeleteConfirmText("");
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!paymentToDelete) return;
+    
+    const confirmValue = paymentToDelete.reference || paymentToDelete.id;
+    if (deleteConfirmText !== confirmValue) {
+      toast.error("Confirmation text does not match");
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await deletePayment(paymentToDelete.id);
+      toast.success("Payment deleted successfully");
+      setDeleteDialogOpen(false);
+      setPaymentToDelete(null);
+      setDeleteConfirmText("");
+      await fetchPayments({ page: pagination.page, size: pagination.size });
+    } catch (error) {
+      // Error is already handled by the store
+    } finally {
+      setIsDeleting(false);
     }
   };
 
+  const handleCreateDirectPayment = async (data: DirectPaymentFormData) => {
+    setIsCreatingDirectPayment(true);
+    try {
+      const payload: NewCreateDirectPaymentDto = {
+        amount: data.amount,
+        description: data.description,
+        phone: data.phone,
+        service_mobile_code: data.service_mobile_code || undefined,
+      };
+      await createDirectPayment(payload);
+      toast.success("Direct payment initialized successfully");
+      setIsDirectPaymentOpen(false);
+      directPaymentForm.reset();
+      await fetchPayments({ page: pagination.page, size: pagination.size });
+    } catch (error) {
+      // Error is already handled by the store
+    } finally {
+      setIsCreatingDirectPayment(false);
+    }
+  };
+
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat("en-US").format(num);
+  };
+
+  const hasPayments = payments.length > 0;
+  const totalPayments = pagination.total;
+  const initiatedPayments = payments.filter((p) => p.status === "INIT").length;
+  const failedPayments = payments.filter((p) => p.status === "FAILED").length;
+
+  const statCards = [
+    {
+      title: "Total Payments",
+      value: totalPayments,
+      description: "All payment links created",
+      icon: Receipt,
+      iconColor: "text-blue-600",
+      bgColor: "bg-blue-100",
+    },
+    {
+      title: "Payments Initiated",
+      value: initiatedPayments,
+      description: "Payment links ready",
+      icon: CheckCircle2,
+      iconColor: "text-green-600",
+      bgColor: "bg-green-100",
+    },
+    {
+      title: "Payments Failed",
+      value: failedPayments,
+      description: "Failed payment attempts",
+      icon: XCircle,
+      iconColor: "text-red-600",
+      bgColor: "bg-red-100",
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-6 p-6 animate-fade-in">
-      {/* Header Section */}
+      {/* Header Section - Only show when no payments */}
+      {!hasPayments && (
       <div className="flex flex-col items-center justify-center gap-4 rounded-lg bg-green-50 p-8 text-center animate-slide-up">
         <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-green-100">
           <Zap className="h-8 w-8 text-green-600" />
@@ -34,77 +174,297 @@ export default function PaymentsPage() {
           Create your first payment link and start accepting payments from your
           customers in just a few minutes.
         </p>
-        <div className="flex gap-4">
-          <Button asChild size="lg">
-            <Link href="/merchant/payments/create">
-              <Plus className="mr-2 h-4 w-4" />
-              Create payment link
+          <div className="flex flex-wrap gap-4 justify-center">
+          <Dialog open={isDirectPaymentOpen} onOpenChange={setIsDirectPaymentOpen}>
+            <DialogTrigger asChild>
+              <Button size="lg">
+                <Phone className="mr-2 h-4 w-4" />
+                Direct Payment
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Initialize Direct Payment</DialogTitle>
+                <DialogDescription>
+                  Initialize a direct payment to a specific phone number.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={directPaymentForm.handleSubmit(handleCreateDirectPayment)} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="direct-amount">Amount *</Label>
+                  <Input
+                    id="direct-amount"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Enter amount"
+                    {...directPaymentForm.register("amount", {
+                      required: "Amount is required",
+                      min: { value: 0.01, message: "Amount must be greater than 0" },
+                      valueAsNumber: true,
+                    })}
+                  />
+                  {directPaymentForm.formState.errors.amount && (
+                    <p className="text-sm text-red-500">
+                      {directPaymentForm.formState.errors.amount.message}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="direct-phone">Phone Number *</Label>
+                  <Input
+                    id="direct-phone"
+                    type="tel"
+                    placeholder="Enter phone number"
+                    {...directPaymentForm.register("phone", {
+                      required: "Phone number is required",
+                    })}
+                  />
+                  {directPaymentForm.formState.errors.phone && (
+                    <p className="text-sm text-red-500">
+                      {directPaymentForm.formState.errors.phone.message}
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="service-mobile-code">Mobile Service</Label>
+                  <Select
+                    value={directPaymentForm.watch("service_mobile_code") || ""}
+                    onValueChange={(value) =>
+                      directPaymentForm.setValue("service_mobile_code", value)
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select mobile service (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {services.map((service) => (
+                        <SelectItem key={service.id} value={service.code_prefix}>
+                          {service.name} ({service.code_prefix})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="direct-description">Description *</Label>
+                  <Textarea
+                    id="direct-description"
+                    placeholder="Enter payment description"
+                    {...directPaymentForm.register("description", {
+                      required: "Description is required",
+                    })}
+                  />
+                  {directPaymentForm.formState.errors.description && (
+                    <p className="text-sm text-red-500">
+                      {directPaymentForm.formState.errors.description.message}
+                    </p>
+                  )}
+                </div>
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsDirectPaymentOpen(false)}
+                    disabled={isCreatingDirectPayment}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isCreatingDirectPayment}>
+                    {isCreatingDirectPayment ? "Initializing..." : "Initialize Payment"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          <Button size="lg" asChild>
+            <Link href="/merchant/payments/manage-payment-links">
+              <Settings className="mr-2 h-4 w-4" />
+              Manage Payment Links
             </Link>
           </Button>
-          <Button variant="outline" size="lg">
-            Learn more
-          </Button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Features Section */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+      {/* Page Title - Show when payments exist */}
+      {hasPayments && (
+        <div className="flex flex-col gap-2 animate-slide-up">
+          <h1 className="text-3xl font-bold">Transactions</h1>
+          <p className="text-muted-foreground">
+            View and manage your payment transactions
+          </p>
+        </div>
+      )}
+
+      {/* Stat Cards - Show when payments exist */}
+      {hasPayments && (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {statCards.map((card, index) => {
+            const Icon = card.icon;
+            return (
+              <Card
+                key={card.title}
+                className="animate-slide-up"
+                style={{
+                  animationDelay: `${index * 0.05}s`,
+                  animationFillMode: "both",
+                }}
+              >
           <CardHeader>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-green-100">
-              <Zap className="h-5 w-5 text-green-600" />
+                  <div
+                    className={`mb-2 flex h-10 w-10 items-center justify-center rounded ${card.bgColor}`}
+                  >
+                    <Icon className={`h-5 w-5 ${card.iconColor}`} />
             </div>
-            <CardTitle>Instant payment</CardTitle>
+                  <CardDescription>{card.title}</CardDescription>
+                  {isLoading ? (
+                    <Skeleton className="h-8 w-24" />
+                  ) : (
+                    <CardTitle className="text-2xl font-semibold tabular-nums">
+                      {formatNumber(card.value)}
+                    </CardTitle>
+                  )}
           </CardHeader>
           <CardContent>
-            <CardDescription>Receive payments immediately</CardDescription>
+                  <p className="text-sm text-muted-foreground">
+                    {card.description}
+                  </p>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-blue-100">
-              <RefreshCw className="h-5 w-5 text-blue-600" />
+            );
+          })}
             </div>
-            <CardTitle>Real-time tracking</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CardDescription>Monitor all your transactions</CardDescription>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-purple-100">
-              <CreditCard className="h-5 w-5 text-purple-600" />
-            </div>
-            <CardTitle>Multiple methods</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CardDescription>
-              Mobile Money, Cards, Bank Transfers, Digital wallet
-            </CardDescription>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-orange-100">
-              <Clock className="h-5 w-5 text-orange-600" />
-            </div>
-            <CardTitle>Detailed history</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CardDescription>Access all your data</CardDescription>
-          </CardContent>
-        </Card>
-      </div>
+      )}
 
       {/* Payments Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Payments</CardTitle>
-          <CardDescription>View and manage your payment transactions</CardDescription>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle>{hasPayments ? "Transactions" : "Recent Transactions"}</CardTitle>
+              <CardDescription>
+                {hasPayments
+                  ? "View and manage your payment transactions"
+                  : "View and manage your payment transactions"}
+              </CardDescription>
+            </div>
+            {/* Action Buttons - Moved to table header */}
+            {hasPayments && (
+              <div className="flex flex-wrap gap-2">
+                <Dialog open={isDirectPaymentOpen} onOpenChange={setIsDirectPaymentOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm">
+                      <Phone className="mr-2 h-4 w-4" />
+                      Direct Payment
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Initialize Direct Payment</DialogTitle>
+                      <DialogDescription>
+                        Initialize a direct payment to a specific phone number.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={directPaymentForm.handleSubmit(handleCreateDirectPayment)} className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="direct-amount">Amount *</Label>
+                        <Input
+                          id="direct-amount"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          placeholder="Enter amount"
+                          {...directPaymentForm.register("amount", {
+                            required: "Amount is required",
+                            min: { value: 0.01, message: "Amount must be greater than 0" },
+                            valueAsNumber: true,
+                          })}
+                        />
+                        {directPaymentForm.formState.errors.amount && (
+                          <p className="text-sm text-red-500">
+                            {directPaymentForm.formState.errors.amount.message}
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="direct-phone">Phone Number *</Label>
+                        <Input
+                          id="direct-phone"
+                          type="tel"
+                          placeholder="Enter phone number"
+                          {...directPaymentForm.register("phone", {
+                            required: "Phone number is required",
+                          })}
+                        />
+                        {directPaymentForm.formState.errors.phone && (
+                          <p className="text-sm text-red-500">
+                            {directPaymentForm.formState.errors.phone.message}
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="service-mobile-code">Mobile Service</Label>
+                        <Select
+                          value={directPaymentForm.watch("service_mobile_code") || ""}
+                          onValueChange={(value) =>
+                            directPaymentForm.setValue("service_mobile_code", value)
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select mobile service (optional)" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {services.map((service) => (
+                              <SelectItem key={service.id} value={service.code_prefix}>
+                                {service.name} ({service.code_prefix})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="direct-description">Description *</Label>
+                        <Textarea
+                          id="direct-description"
+                          placeholder="Enter payment description"
+                          {...directPaymentForm.register("description", {
+                            required: "Description is required",
+                          })}
+                        />
+                        {directPaymentForm.formState.errors.description && (
+                          <p className="text-sm text-red-500">
+                            {directPaymentForm.formState.errors.description.message}
+                          </p>
+                        )}
+                      </div>
+                      <DialogFooter>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setIsDirectPaymentOpen(false)}
+                          disabled={isCreatingDirectPayment}
+                        >
+                          Cancel
+                        </Button>
+                        <Button type="submit" disabled={isCreatingDirectPayment}>
+                          {isCreatingDirectPayment ? "Initializing..." : "Initialize Payment"}
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+
+                <Button size="sm" asChild>
+                  <Link href="/merchant/payments/manage-payment-links">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Manage Links
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -115,15 +475,58 @@ export default function PaymentsPage() {
             >
               <PaymentsTable
                 data={Array.isArray(payments) ? payments : []}
-                onDelete={handleDelete}
+                onDelete={handleDeleteClick}
                 isLoading={isLoading}
+                pagination={pagination}
+                onPaginationChange={(page, size) => fetchPayments({ page, size })}
               />
             </Suspense>
           )}
         </CardContent>
       </Card>
 
-      {/* Help Section */}
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Payment</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the payment.
+              <br />
+              <br />
+              To confirm, please type{" "}
+              <strong className="font-mono">
+                {paymentToDelete?.reference || paymentToDelete?.id}
+              </strong>{" "}
+              below:
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2 py-4">
+            <Input
+              placeholder="Enter confirmation text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              disabled={isDeleting}
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              disabled={
+                isDeleting ||
+                deleteConfirmText !== (paymentToDelete?.reference || paymentToDelete?.id)
+              }
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Help Section - Only show when no payments */}
+      {!hasPayments && (
       <div className="flex flex-col gap-4 rounded-lg border p-6 md:flex-row md:items-center md:justify-between">
         <div>
           <h3 className="text-lg font-semibold">Need help getting started?</h3>
@@ -177,6 +580,7 @@ export default function PaymentsPage() {
           </Card>
         </div>
       </div>
+      )}
     </div>
   );
 }
