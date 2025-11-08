@@ -2,24 +2,19 @@
 
 import * as React from "react"
 import {
-  IconCamera,
-  IconChartBar,
   IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
-  IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
-  IconSearch,
-  IconSettings,
   IconUsers,
+  IconWorld,
+  IconSettings,
+  IconCreditCard,
+  IconTransfer,
+  IconBolt,
+  IconHelp,
+  IconSearch,
+  IconInnerShadowTop,
 } from "@tabler/icons-react"
 
-import { NavDocuments } from "@/components/nav-documents"
+import { useAuthStore, type UserRole } from "@/stores/auth.store"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
@@ -33,88 +28,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "#",
-      icon: IconDashboard,
-    },
-    {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
+const getNavigationForRole = (role: UserRole | null) => {
+  const baseNavSecondary = [
     {
       title: "Settings",
       url: "#",
@@ -130,27 +45,93 @@ const data = {
       url: "#",
       icon: IconSearch,
     },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: IconDatabase,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
-    },
-  ],
+  ]
+
+  switch (role) {
+    case "ADMIN":
+      return {
+        navMain: [
+          {
+            title: "Dashboard",
+            url: "/admin",
+            icon: IconDashboard,
+          },
+          {
+            title: "Users",
+            url: "/admin/users",
+            icon: IconUsers,
+          },
+          {
+            title: "Countries",
+            url: "/admin/countries",
+            icon: IconWorld,
+          },
+          {
+            title: "Services",
+            url: "/admin/services",
+            icon: IconSettings,
+          },
+        ],
+        navSecondary: baseNavSecondary,
+      }
+    case "MERCHANT":
+      return {
+        navMain: [
+          {
+            title: "Dashboard",
+            url: "/merchant",
+            icon: IconDashboard,
+          },
+          {
+            title: "Payments",
+            url: "/merchant/payments",
+            icon: IconCreditCard,
+          },
+          {
+            title: "Transfers",
+            url: "/merchant/transfers",
+            icon: IconTransfer,
+          },
+          {
+            title: "Quick Links",
+            url: "/merchant/quick",
+            icon: IconBolt,
+          },
+        ],
+        navSecondary: baseNavSecondary,
+      }
+    case "CLIENT":
+    default:
+      return {
+        navMain: [
+          {
+            title: "Dashboard",
+            url: "/dashboard",
+            icon: IconDashboard,
+          },
+        ],
+        navSecondary: baseNavSecondary,
+      }
+  }
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { user, currentRole } = useAuthStore()
+  const role = currentRole || (user?.role as UserRole) || "CLIENT"
+  const navigation = getNavigationForRole(role)
+
+  const userData = user
+    ? {
+        name: user.fullname,
+        email: user.email,
+        avatar: "",
+      }
+    : {
+        name: "Guest User",
+        email: "guest@example.com",
+        avatar: "",
+      }
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -160,21 +141,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#">
+              <a href="/">
                 <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <span className="text-base font-semibold">FastPay</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={navigation.navMain} />
+        <NavSecondary items={navigation.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={userData} />
       </SidebarFooter>
     </Sidebar>
   )
