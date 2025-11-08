@@ -1,8 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
 import { useAuthStore, type UserRole } from "@/stores/auth.store";
+import { useOrganisationsStore } from "@/stores/organisations.store";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
+import { OrganizationOverlay } from "@/components/organization-overlay";
 import {
   SidebarInset,
   SidebarProvider,
@@ -15,12 +18,34 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { user, isHydrated } = useAuthStore();
+  const {
+    organisations,
+    organisation,
+    hasOrganisation,
+    fetchMyOrganisations,
+    isLoading: orgLoading,
+  } = useOrganisationsStore();
   const role = user?.role as UserRole | undefined;
 
-  // Show loading state while hydrating
-  if (!isHydrated) {
+  // Fetch organizations for merchant users
+  useEffect(() => {
+    if (isHydrated && role === "MERCHANT") {
+      // Only fetch if we don't have organizations and we're not already loading
+      if (organisations.length === 0 && !orgLoading) {
+        fetchMyOrganisations();
+      }
+    }
+  }, [isHydrated, role, organisations.length, orgLoading, fetchMyOrganisations]);
+
+  // Show loading state while hydrating or fetching organization
+  if (!isHydrated || (role === "MERCHANT" && orgLoading && !organisation)) {
     return <PageLoader text="Loading dashboard..." />;
   }
+
+  // Check if merchant user has organization
+  // Only show overlay if: user is merchant, not loading, and definitely doesn't have organization
+  const isMerchant = role === "MERCHANT";
+  const showOverlay = isMerchant && !orgLoading && !hasOrganisation() && !organisation;
 
   // AuthProvider handles routing, so if we reach here, user is authenticated
   // and has access to the current route
@@ -43,6 +68,7 @@ export default function DashboardLayout({
           </div>
         </div>
       </SidebarInset>
+      {showOverlay && <OrganizationOverlay />}
     </SidebarProvider>
   );
 }

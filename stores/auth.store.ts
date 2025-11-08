@@ -108,6 +108,10 @@ export const useAuthStore = create<AuthState>()(
         } catch (error) {
           console.error("Logout error:", error);
         } finally {
+          // Clear all localStorage items
+          if (typeof window !== "undefined") {
+            localStorage.clear();
+          }
           removeAuthToken();
           set({
             user: null,

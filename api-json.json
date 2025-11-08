@@ -72,38 +72,6 @@
               }
             }
           ],
-          "responses": {
-            "200": {
-              "description": "Paiements retrieved successfully"
-            }
-          },
-          "summary": "Get all paiements",
-          "tags": [
-            "paiements"
-          ]
-        }
-      },
-      "/api/paiements/filter": {
-        "post": {
-          "operationId": "PaiementsController_filterPaiements",
-          "parameters": [
-            {
-              "name": "page",
-              "required": false,
-              "in": "query",
-              "schema": {
-                "type": "number"
-              }
-            },
-            {
-              "name": "size",
-              "required": false,
-              "in": "query",
-              "schema": {
-                "type": "number"
-              }
-            }
-          ],
           "requestBody": {
             "required": true,
             "content": {
@@ -116,10 +84,10 @@
           },
           "responses": {
             "200": {
-              "description": "Paiements filtered successfully"
+              "description": "Paiements retrieved successfully"
             }
           },
-          "summary": "Filter paiements by type, status, date, or provider",
+          "summary": "Get  paiements",
           "tags": [
             "paiements"
           ]
@@ -1649,6 +1617,9 @@
             },
             "dateTo": {
               "type": "number"
+            },
+            "organisationId": {
+              "type": "string"
             }
           },
           "required": [

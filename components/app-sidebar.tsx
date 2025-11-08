@@ -19,6 +19,7 @@ import { useAuthStore, type UserRole } from "@/stores/auth.store"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
+import { OrganizationSwitcher } from "@/components/organization-switcher"
 import {
   Sidebar,
   SidebarContent,
@@ -159,6 +160,11 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        {role === "MERCHANT" && (
+          <div className="px-2 py-2 border-b">
+            <OrganizationSwitcher align="start" fullWidth />
+          </div>
+        )}
         <NavMain items={navigation.navMain} />
         <NavSecondary items={navigation.navSecondary} className="mt-auto" />
       </SidebarContent>
