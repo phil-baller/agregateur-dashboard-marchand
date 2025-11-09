@@ -57,8 +57,13 @@ export const getAuthHeaders = (token?: string | null): HeadersInit => {
         if (!cachedAuthStoreModule) {
           cachedAuthStoreModule = require("@/stores/auth.store");
         }
-        const state = cachedAuthStoreModule.useAuthStore.getState();
-        authToken = state.token;
+        // TypeScript guard: ensure cachedAuthStoreModule is not null
+        if (!cachedAuthStoreModule) {
+          authToken = getAuthToken();
+        } else {
+          const state = cachedAuthStoreModule.useAuthStore.getState();
+          authToken = state.token;
+        }
       } catch {
         // Fallback to localStorage if store is not available
         authToken = getAuthToken();

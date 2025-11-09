@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useAuthStore } from "@/stores/auth.store";
 import { Button } from "@/components/ui/button";
@@ -17,11 +18,19 @@ import {
   CheckCircle2,
   TrendingUp,
   Globe,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
   const { user, isAuthenticated, isHydrated } = useAuthStore();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     // Wait for store to hydrate before making routing decisions
@@ -36,6 +45,32 @@ export default function Home() {
       router.push(route);
     }
   }, [isHydrated, isAuthenticated, user, router]);
+
+  const toggleTheme = () => {
+    if (!mounted) return;
+    // Get the resolved theme (if system, check actual system preference)
+    let resolvedTheme = theme;
+    if (theme === "system" && typeof window !== "undefined") {
+      resolvedTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    // Toggle between light and dark
+    const newTheme = resolvedTheme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+  };
+
+  // Get the current theme for display (resolve system theme to actual theme)
+  const getCurrentTheme = () => {
+    if (!mounted) return "light";
+    if (theme === "system") {
+      if (typeof window !== "undefined") {
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      return "light";
+    }
+    return theme || "light";
+  };
+
+  const currentTheme = getCurrentTheme();
 
   const features = [
     {
@@ -87,7 +122,20 @@ export default function Home() {
             </div>
             <span className="text-xl font-bold">FastPay</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="h-9 w-9"
+              aria-label="Toggle theme"
+            >
+              {currentTheme === "dark" ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+            </Button>
             <Button variant="ghost" asChild>
               <Link href="/login">Sign In</Link>
             </Button>
@@ -174,8 +222,19 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="border-t bg-primary py-20 text-primary-foreground md:py-32">
-        <div className="container mx-auto px-4">
+      <section className="relative border-t bg-primary py-20 text-primary-foreground md:py-32 overflow-hidden">
+        {/* Grid Pattern Background */}
+        <div 
+          className="absolute inset-0 opacity-[0.15]"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px',
+          }}
+        />
+        <div className="container mx-auto px-4 relative z-10">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">
               Ready to get started?

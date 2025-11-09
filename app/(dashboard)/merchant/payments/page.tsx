@@ -146,24 +146,24 @@ export default function PaymentsPage() {
       value: totalPayments,
       description: "All payment links created",
       icon: Receipt,
-      iconColor: "text-blue-600",
-      bgColor: "bg-blue-100",
+      iconColor: "text-primary",
+      bgColor: "bg-primary/20",
     },
     {
       title: "Payments Initiated",
       value: initiatedPayments,
       description: "Payment links ready",
       icon: CheckCircle2,
-      iconColor: "text-green-600",
-      bgColor: "bg-green-100",
+      iconColor: "text-primary",
+      bgColor: "bg-primary/20",
     },
     {
       title: "Payments Failed",
       value: failedPayments,
       description: "Failed payment attempts",
       icon: XCircle,
-      iconColor: "text-red-600",
-      bgColor: "bg-red-100",
+      iconColor: "text-destructive",
+      bgColor: "bg-destructive/20",
     },
   ];
 
@@ -171,9 +171,9 @@ export default function PaymentsPage() {
     <div className="flex flex-col gap-6 p-6 animate-fade-in">
       {/* Header Section - Only show when no payments */}
       {!hasPayments && (
-      <div className="flex flex-col items-center justify-center gap-4 rounded-lg bg-green-50 p-8 text-center animate-slide-up">
-        <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-green-100">
-          <Zap className="h-8 w-8 text-green-600" />
+      <div className="flex flex-col items-center justify-center gap-4 rounded-lg bg-primary/10 p-8 text-center animate-slide-up">
+        <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary/20">
+          <Zap className="h-8 w-8 text-primary" />
         </div>
         <h1 className="text-3xl font-bold">Start receiving payments</h1>
         <p className="max-w-2xl text-muted-foreground">
@@ -211,7 +211,7 @@ export default function PaymentsPage() {
                     })}
                   />
                   {directPaymentForm.formState.errors.amount && (
-                    <p className="text-sm text-red-500">
+                    <p className="text-sm text-destructive">
                       {directPaymentForm.formState.errors.amount.message}
                     </p>
                   )}
@@ -227,7 +227,7 @@ export default function PaymentsPage() {
                     })}
                   />
                   {directPaymentForm.formState.errors.phone && (
-                    <p className="text-sm text-red-500">
+                    <p className="text-sm text-destructive">
                       {directPaymentForm.formState.errors.phone.message}
                     </p>
                   )}
@@ -262,7 +262,7 @@ export default function PaymentsPage() {
                     })}
                   />
                   {directPaymentForm.formState.errors.description && (
-                    <p className="text-sm text-red-500">
+                    <p className="text-sm text-destructive">
                       {directPaymentForm.formState.errors.description.message}
                     </p>
                   )}
@@ -389,7 +389,7 @@ export default function PaymentsPage() {
                           })}
                         />
                         {directPaymentForm.formState.errors.amount && (
-                          <p className="text-sm text-red-500">
+                          <p className="text-sm text-destructive">
                             {directPaymentForm.formState.errors.amount.message}
                           </p>
                         )}
@@ -405,7 +405,7 @@ export default function PaymentsPage() {
                           })}
                         />
                         {directPaymentForm.formState.errors.phone && (
-                          <p className="text-sm text-red-500">
+                          <p className="text-sm text-destructive">
                             {directPaymentForm.formState.errors.phone.message}
                           </p>
                         )}
@@ -440,7 +440,7 @@ export default function PaymentsPage() {
                           })}
                         />
                         {directPaymentForm.formState.errors.description && (
-                          <p className="text-sm text-red-500">
+                          <p className="text-sm text-destructive">
                             {directPaymentForm.formState.errors.description.message}
                           </p>
                         )}
@@ -523,7 +523,7 @@ export default function PaymentsPage() {
                 isDeleting ||
                 deleteConfirmText !== (paymentToDelete?.reference || paymentToDelete?.id)
               }
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive/90"
             >
               {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>
@@ -539,7 +539,7 @@ export default function PaymentsPage() {
           <p className="text-muted-foreground">
             Consult our guides and documentation to get started quickly.
           </p>
-          <Link href="/support" className="mt-2 text-green-600 hover:underline">
+          <Link href="/support" className="mt-2 text-primary hover:underline">
             Contact support →
           </Link>
         </div>

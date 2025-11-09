@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, type ComponentProps } from "react"
+import { useEffect, useState, type ComponentProps } from "react"
 import { useRouter } from "next/navigation"
+import { useTheme } from "next-themes"
 import {
   IconDashboard,
   IconUsers,
@@ -13,6 +14,9 @@ import {
   IconHelp,
   IconSearch,
   IconInnerShadowTop,
+  IconSun,
+  IconMoon,
+  IconDeviceDesktop,
 } from "@tabler/icons-react"
 
 import { useAuthStore, type UserRole } from "@/stores/auth.store"
@@ -29,6 +33,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 const getNavigationForRole = (role: UserRole | null) => {
   const baseNavSecondary = [
@@ -117,6 +128,71 @@ const getNavigationForRole = (role: UserRole | null) => {
   }
 }
 
+const ThemeSwitcher = () => {
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const currentTheme = mounted ? theme : "system"
+
+  const getThemeIcon = () => {
+    switch (currentTheme) {
+      case "light":
+        return <IconSun className="size-4" />
+      case "dark":
+        return <IconMoon className="size-4" />
+      default:
+        return <IconDeviceDesktop className="size-4" />
+    }
+  }
+
+  const getThemeLabel = () => {
+    switch (currentTheme) {
+      case "light":
+        return "Light"
+      case "dark":
+        return "Dark"
+      default:
+        return "System"
+    }
+  }
+
+  return (
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton tooltip="Theme" className="w-full">
+              {getThemeIcon()}
+              <span>{getThemeLabel()}</span>
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuRadioGroup value={currentTheme} onValueChange={setTheme}>
+              <DropdownMenuRadioItem value="light">
+                <IconSun className="mr-2 size-4" />
+                <span>Light</span>
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="dark">
+                <IconMoon className="mr-2 size-4" />
+                <span>Dark</span>
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="system">
+                <IconDeviceDesktop className="mr-2 size-4" />
+                <span>System</span>
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    </SidebarMenu>
+  )
+}
+
 export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
   const router = useRouter()
   const { user, getRole, isAuthenticated, isHydrated } = useAuthStore()
@@ -174,6 +250,7 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
         <NavSecondary items={navigation.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
+        <ThemeSwitcher />
         <NavUser user={userData} />
       </SidebarFooter>
     </Sidebar>

@@ -9,9 +9,9 @@ export default function QuickLinksPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
       {/* Header Section */}
-      <div className="flex flex-col items-center justify-center gap-4 rounded-lg bg-green-50 p-8 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-green-100">
-          <div className="flex h-12 w-12 items-center justify-center rounded bg-green-200">
+      <div className="flex flex-col items-center justify-center gap-4 rounded-lg bg-primary/10 p-8 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary/20">
+          <div className="flex h-12 w-12 items-center justify-center rounded bg-primary/30">
             <span className="text-2xl">🔗</span>
           </div>
         </div>
@@ -37,8 +37,8 @@ export default function QuickLinksPage() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-gray-100">
-              <Code className="h-5 w-5 text-gray-600" />
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-muted">
+              <Code className="h-5 w-5 text-muted-foreground" />
             </div>
             <CardTitle>No coding required</CardTitle>
           </CardHeader>
@@ -49,8 +49,8 @@ export default function QuickLinksPage() {
 
         <Card>
           <CardHeader>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-gray-100">
-              <Clock className="h-5 w-5 text-gray-600" />
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-muted">
+              <Clock className="h-5 w-5 text-muted-foreground" />
             </div>
             <CardTitle>Instant payments</CardTitle>
           </CardHeader>
@@ -61,8 +61,8 @@ export default function QuickLinksPage() {
 
         <Card>
           <CardHeader>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-gray-100">
-              <CreditCard className="h-5 w-5 text-gray-600" />
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-muted">
+              <CreditCard className="h-5 w-5 text-muted-foreground" />
             </div>
             <CardTitle>Multiple payment methods</CardTitle>
           </CardHeader>
@@ -73,8 +73,8 @@ export default function QuickLinksPage() {
 
         <Card>
           <CardHeader>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-gray-100">
-              <CheckCircle className="h-5 w-5 text-gray-600" />
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-muted">
+              <CheckCircle className="h-5 w-5 text-muted-foreground" />
             </div>
             <CardTitle>Secure transactions</CardTitle>
           </CardHeader>
@@ -91,7 +91,7 @@ export default function QuickLinksPage() {
           <p className="text-muted-foreground">
             Learn how to create and share payment links effectively.
           </p>
-          <Link href="/support" className="mt-2 text-green-600 hover:underline">
+          <Link href="/support" className="mt-2 text-primary hover:underline">
             Contact support →
           </Link>
         </div>

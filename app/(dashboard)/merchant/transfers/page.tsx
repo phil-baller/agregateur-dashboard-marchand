@@ -25,10 +25,10 @@ export default function TransfersPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
       {/* Header Section */}
-      <div className="flex flex-col items-center justify-center gap-4 rounded-lg bg-green-50 p-8 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-green-100">
-          <div className="flex h-12 w-12 items-center justify-center rounded bg-green-200">
-            <span className="text-2xl font-bold text-green-700">$</span>
+      <div className="flex flex-col items-center justify-center gap-4 rounded-lg bg-primary/10 p-8 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary/20">
+          <div className="flex h-12 w-12 items-center justify-center rounded bg-primary/30">
+            <span className="text-2xl font-bold text-primary">$</span>
           </div>
         </div>
         <h1 className="text-3xl font-bold">Start making withdrawals</h1>
@@ -53,8 +53,8 @@ export default function TransfersPage() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-blue-100">
-              <Building2 className="h-5 w-5 text-blue-600" />
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-primary/20">
+              <Building2 className="h-5 w-5 text-primary" />
             </div>
             <CardTitle>Bank transfer</CardTitle>
           </CardHeader>
@@ -65,8 +65,8 @@ export default function TransfersPage() {
 
         <Card>
           <CardHeader>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-green-100">
-              <Smartphone className="h-5 w-5 text-green-600" />
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-primary/20">
+              <Smartphone className="h-5 w-5 text-primary" />
             </div>
             <CardTitle>Mobile Money</CardTitle>
           </CardHeader>
@@ -77,8 +77,8 @@ export default function TransfersPage() {
 
         <Card>
           <CardHeader>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-purple-100">
-              <RefreshCw className="h-5 w-5 text-purple-600" />
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-primary/20">
+              <RefreshCw className="h-5 w-5 text-primary" />
             </div>
             <CardTitle>Automatic withdrawals</CardTitle>
           </CardHeader>
@@ -126,7 +126,7 @@ export default function TransfersPage() {
           <p className="text-muted-foreground">
             Find out how to set up and optimize your withdrawals.
           </p>
-          <Link href="/support" className="mt-2 text-green-600 hover:underline">
+          <Link href="/support" className="mt-2 text-primary hover:underline">
             Contact support →
           </Link>
         </div>

@@ -49,8 +49,8 @@ export default function MerchantPage() {
       value: overview?.totalTransactions ?? 0,
       description: "All transactions processed",
       icon: Receipt,
-      iconColor: "text-blue-600",
-      bgColor: "bg-blue-100",
+      iconColor: "text-primary",
+      bgColor: "bg-primary/20",
       format: formatNumber,
     },
     {
@@ -58,8 +58,8 @@ export default function MerchantPage() {
       value: overview?.totalAmount ?? 0,
       description: "Total revenue generated",
       icon: DollarSign,
-      iconColor: "text-green-600",
-      bgColor: "bg-green-100",
+      iconColor: "text-primary",
+      bgColor: "bg-primary/20",
       format: formatCurrency,
     },
     {
@@ -67,8 +67,8 @@ export default function MerchantPage() {
       value: overview?.successfulTransactions ?? 0,
       description: "Completed transactions",
       icon: CheckCircle2,
-      iconColor: "text-green-600",
-      bgColor: "bg-green-100",
+      iconColor: "text-primary",
+      bgColor: "bg-primary/20",
       format: formatNumber,
     },
     {
@@ -76,8 +76,8 @@ export default function MerchantPage() {
       value: overview?.failedTransactions ?? 0,
       description: "Transactions that failed",
       icon: XCircle,
-      iconColor: "text-red-600",
-      bgColor: "bg-red-100",
+      iconColor: "text-destructive",
+      bgColor: "bg-destructive/20",
       format: formatNumber,
     },
     {
@@ -85,8 +85,8 @@ export default function MerchantPage() {
       value: overview?.commissions ?? 0,
       description: "Total commissions earned",
       icon: TrendingUp,
-      iconColor: "text-purple-600",
-      bgColor: "bg-purple-100",
+      iconColor: "text-primary",
+      bgColor: "bg-primary/20",
       format: formatCurrency,
     },
   ];
@@ -148,8 +148,8 @@ export default function MerchantPage() {
           }}
         >
           <CardHeader>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-green-100">
-              <CreditCard className="h-5 w-5 text-green-600" />
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-primary/20">
+              <CreditCard className="h-5 w-5 text-primary" />
             </div>
             <CardTitle>Payments</CardTitle>
             <CardDescription>
@@ -174,8 +174,8 @@ export default function MerchantPage() {
           }}
         >
           <CardHeader>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-blue-100">
-              <DollarSign className="h-5 w-5 text-blue-600" />
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-primary/20">
+              <DollarSign className="h-5 w-5 text-primary" />
             </div>
             <CardTitle>Transfers</CardTitle>
             <CardDescription>
@@ -200,8 +200,8 @@ export default function MerchantPage() {
           }}
         >
           <CardHeader>
-            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-purple-100">
-              <Zap className="h-5 w-5 text-purple-600" />
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded bg-primary/20">
+              <Zap className="h-5 w-5 text-primary" />
             </div>
             <CardTitle>Quick Links</CardTitle>
             <CardDescription>

@@ -109,6 +109,10 @@ const getTokenFromAuthStore = (): string | null => {
     if (!cachedAuthStore) {
       cachedAuthStore = require("@/stores/auth.store");
     }
+    // TypeScript guard: ensure cachedAuthStore is not null
+    if (!cachedAuthStore) {
+      return getAuthToken();
+    }
     const state = cachedAuthStore.useAuthStore.getState();
     return state.token;
   } catch (error) {
