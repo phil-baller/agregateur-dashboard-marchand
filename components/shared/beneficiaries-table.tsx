@@ -1,17 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
+import * as React from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/data-table/data-table";
 import { useDataTable } from "@/hooks/use-data-table";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Eye, Trash2, Pencil } from "lucide-react";
+
 interface Beneficiary {
   id: string;
   name: string;
@@ -23,18 +17,20 @@ interface Beneficiary {
 
 interface BeneficiariesTableProps {
   data: Beneficiary[];
-  onView?: (id: string) => void;
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
   isLoading?: boolean;
+  pagination?: {
+    page: number;
+    size: number;
+    total: number;
+  };
+  onPaginationChange?: (page: number, size: number) => void;
 }
 
 export const BeneficiariesTable = ({
   data,
-  onView,
-  onEdit,
-  onDelete,
   isLoading = false,
+  pagination,
+  onPaginationChange,
 }: BeneficiariesTableProps) => {
   const columns = useMemo<ColumnDef<Beneficiary>[]>(
     () => [
@@ -57,54 +53,62 @@ export const BeneficiariesTable = ({
       },
       {
         accessorKey: "country_id",
-        header: "Country",
-        cell: ({ row }) => <div>{row.original.country_id}</div>,
-      },
-      {
-        id: "actions",
+        header: "Country ID",
         cell: ({ row }) => (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {onView && (
-                <DropdownMenuItem onClick={() => onView(row.original.id)}>
-                  <Eye className="mr-2 h-4 w-4" />
-                  View
-                </DropdownMenuItem>
-              )}
-              {onEdit && (
-                <DropdownMenuItem onClick={() => onEdit(row.original.id)}>
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit
-                </DropdownMenuItem>
-              )}
-              {onDelete && (
-                <DropdownMenuItem
-                  onClick={() => onDelete(row.original.id)}
-                  className="text-red-600"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="font-mono text-sm">{row.original.country_id}</div>
         ),
       },
     ],
-    [onView, onEdit, onDelete]
+    []
   );
+
+  const pageCount = pagination
+    ? Math.ceil(pagination.total / pagination.size)
+    : Math.ceil(data.length / 10);
 
   const { table } = useDataTable({
     data,
     columns,
-    pageCount: Math.ceil(data.length / 10),
+    pageCount,
+    initialState: {
+      pagination: pagination
+        ? {
+            pageIndex: pagination.page - 1,
+            pageSize: pagination.size,
+          }
+        : undefined,
+    },
   });
+
+  const prevPaginationRef = React.useRef({
+    pageIndex: pagination ? pagination.page - 1 : 0,
+    pageSize: pagination?.size || 10,
+  });
+
+  React.useEffect(() => {
+    if (!onPaginationChange || !pagination) return;
+
+    const currentPageIndex = table.getState().pagination.pageIndex;
+    const currentPageSize = table.getState().pagination.pageSize;
+    const prevPageIndex = prevPaginationRef.current.pageIndex;
+    const prevPageSize = prevPaginationRef.current.pageSize;
+
+    if (
+      (currentPageIndex !== prevPageIndex || currentPageSize !== prevPageSize) &&
+      (currentPageIndex + 1 !== pagination.page || currentPageSize !== pagination.size)
+    ) {
+      onPaginationChange(currentPageIndex + 1, currentPageSize);
+      prevPaginationRef.current = {
+        pageIndex: currentPageIndex,
+        pageSize: currentPageSize,
+      };
+    }
+  }, [
+    table.getState().pagination.pageIndex,
+    table.getState().pagination.pageSize,
+    onPaginationChange,
+    pagination,
+  ]);
 
   return <DataTable table={table} />;
 };

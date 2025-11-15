@@ -17,6 +17,7 @@ import {
   IconSun,
   IconMoon,
   IconDeviceDesktop,
+  IconUser,
 } from "@tabler/icons-react"
 
 import { useAuthStore, type UserRole } from "@/stores/auth.store"
@@ -98,6 +99,11 @@ const getNavigationForRole = (role: UserRole | null) => {
             title: "Transfers",
             url: "/merchant/transfers",
             icon: IconTransfer,
+          },
+          {
+            title: "Beneficiaries",
+            url: "/merchant/beneficiaries",
+            icon: IconUser,
           },
           {
             title: "Settings",
