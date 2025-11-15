@@ -13,10 +13,14 @@ interface GroupedPayment {
   launch_url?: string;
   currency?: string;
   when_created?: string;
+  createdAt?: string;
   organisation?: {
     id: string;
     libelle?: string;
     description?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    apiKeys?: unknown[];
     [key: string]: unknown;
   };
   [key: string]: unknown;
@@ -39,7 +43,13 @@ interface GroupedPaymentsState {
     dateTo?: number;
   }) => Promise<void>;
   fetchGroupedPaymentByRef: (reference: string) => Promise<void>;
-  createGroupedPayment: (data: NewCreateGroupedPaymentDto) => Promise<void>;
+  createGroupedPayment: (data: NewCreateGroupedPaymentDto) => Promise<{
+    currency: string;
+    when_created: string;
+    launch_url: string;
+    reference: string;
+    reason?: string;
+  }>;
   deleteGroupedPayment: (id: string) => Promise<void>;
   setSelectedGroupedPayment: (payment: GroupedPayment | null) => void;
   clearError: () => void;
@@ -67,19 +77,28 @@ export const useGroupedPaymentsStore = create<GroupedPaymentsState>((set, get) =
       let size = params?.size || 10;
 
       if (response && typeof response === "object") {
-        // Check for paginated structure: { groupedPayments: { content: [...], page, size, total } }
-        const groupedPayments = (response as { groupedPayments?: { content?: GroupedPayment[]; page?: number; size?: number; total?: number } })?.groupedPayments;
+        // Check for paginated structure: { grouped_payments: { content: [...], page, size, total } }
+        const groupedPayments = (response as { grouped_payments?: { content?: GroupedPayment[]; page?: number; size?: number; total?: number } })?.grouped_payments;
         if (groupedPayments) {
           data = Array.isArray(groupedPayments.content) ? groupedPayments.content : [];
           total = groupedPayments.total || 0;
           page = groupedPayments.page || page;
           size = groupedPayments.size || size;
-        } else if (Array.isArray(response)) {
-          data = response;
-          total = data.length;
-        } else if ((response as { data?: GroupedPayment[] })?.data) {
-          data = (response as { data?: GroupedPayment[] })?.data || [];
-          total = data.length;
+        } else {
+          // Fallback to camelCase for backward compatibility
+          const groupedPaymentsCamel = (response as { groupedPayments?: { content?: GroupedPayment[]; page?: number; size?: number; total?: number } })?.groupedPayments;
+          if (groupedPaymentsCamel) {
+            data = Array.isArray(groupedPaymentsCamel.content) ? groupedPaymentsCamel.content : [];
+            total = groupedPaymentsCamel.total || 0;
+            page = groupedPaymentsCamel.page || page;
+            size = groupedPaymentsCamel.size || size;
+          } else if (Array.isArray(response)) {
+            data = response;
+            total = data.length;
+          } else if ((response as { data?: GroupedPayment[] })?.data) {
+            data = (response as { data?: GroupedPayment[] })?.data || [];
+            total = data.length;
+          }
         }
       } else if (Array.isArray(response)) {
         data = response;
@@ -118,9 +137,38 @@ export const useGroupedPaymentsStore = create<GroupedPaymentsState>((set, get) =
   createGroupedPayment: async (data) => {
     set({ isLoading: true, error: null });
     try {
-      await groupedPaymentsController.createGroupedPayment(data);
+      const response = await groupedPaymentsController.createGroupedPayment(data);
+      
+      // Parse the response to extract grouped_payment data
+      let paymentData: {
+        currency: string;
+        when_created: string;
+        launch_url: string;
+        reference: string;
+        reason?: string;
+      } | null = null;
+
+      if (response && typeof response === "object") {
+        const groupedPayment = (response as { grouped_payment?: typeof paymentData })?.grouped_payment;
+        if (groupedPayment) {
+          paymentData = {
+            currency: groupedPayment.currency,
+            when_created: groupedPayment.when_created,
+            launch_url: groupedPayment.launch_url,
+            reference: groupedPayment.reference,
+            reason: groupedPayment.reason,
+          };
+        }
+      }
+
       await get().fetchGroupedPayments();
       set({ isLoading: false });
+      
+      if (!paymentData) {
+        throw new Error("Invalid response from server");
+      }
+      
+      return paymentData;
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to create grouped payment";

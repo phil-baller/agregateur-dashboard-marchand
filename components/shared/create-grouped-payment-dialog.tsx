@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -48,9 +47,8 @@ export const CreateGroupedPaymentDialog = ({
       await onCreate({
         reason: data.reason,
       });
-      toast.success("Grouped payment link created successfully");
       form.reset();
-      onOpenChange(false);
+      // Don't close dialog here - let the parent handle showing success modal
     } catch (error) {
       // Error is already handled by the store
     } finally {

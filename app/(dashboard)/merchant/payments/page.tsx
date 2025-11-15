@@ -9,6 +9,7 @@ import { PaymentsTable } from "@/components/shared/payments-table";
 import { GroupedPaymentsTable } from "@/components/shared/grouped-payments-table";
 import { PaymentDetailsSheet } from "@/components/shared/payment-details-sheet";
 import { CreateGroupedPaymentDialog } from "@/components/shared/create-grouped-payment-dialog";
+import { GroupedPaymentSuccessDialog } from "@/components/shared/grouped-payment-success-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -71,6 +72,14 @@ export default function PaymentsPage() {
   const [activeTab, setActiveTab] = useState("all");
   const [isDirectPaymentOpen, setIsDirectPaymentOpen] = useState(false);
   const [isGroupedPaymentOpen, setIsGroupedPaymentOpen] = useState(false);
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false);
+  const [createdGroupedPayment, setCreatedGroupedPayment] = useState<{
+    currency: string;
+    when_created: string;
+    launch_url: string;
+    reference: string;
+    reason?: string;
+  } | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteGroupedDialogOpen, setDeleteGroupedDialogOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
@@ -188,7 +197,10 @@ export default function PaymentsPage() {
 
   const handleCreateGroupedPayment = async (data: NewCreateGroupedPaymentDto) => {
     try {
-      await createGroupedPayment(data);
+      const paymentData = await createGroupedPayment(data);
+      setCreatedGroupedPayment(paymentData);
+      setIsGroupedPaymentOpen(false);
+      setIsSuccessDialogOpen(true);
       await fetchGroupedPayments({ page: groupedPagination.page, size: groupedPagination.size });
     } catch (error) {
       // Error is already handled by the store
@@ -639,6 +651,13 @@ export default function PaymentsPage() {
         onOpenChange={setIsGroupedPaymentOpen}
         onCreate={handleCreateGroupedPayment}
         isLoading={isGroupedPaymentsLoading}
+      />
+
+      {/* Grouped Payment Success Dialog */}
+      <GroupedPaymentSuccessDialog
+        open={isSuccessDialogOpen}
+        onOpenChange={setIsSuccessDialogOpen}
+        paymentData={createdGroupedPayment}
       />
 
       {/* Delete Confirmation Dialog for Regular Payments */}
