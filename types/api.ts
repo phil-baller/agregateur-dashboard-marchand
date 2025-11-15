@@ -143,9 +143,14 @@ export interface UpdateBeneficiaireDto {
 export interface CountryResponseDto {
   id: string;
   codeIso2: string;
+  code_phone?: string;
   libelle: string;
-  transactionsEnabled: boolean;
-  authEnabled: boolean;
+  libelle_en?: string;
+  transactionsEnabled?: boolean;
+  authEnabled?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
 }
 
 // Mobile Service Types

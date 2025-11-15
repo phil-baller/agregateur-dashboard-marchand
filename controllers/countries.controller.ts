@@ -1,9 +1,21 @@
 import { apiGet, apiPatch, apiDelete } from "@/lib/api/base";
 import type { CountryResponseDto } from "@/types/api";
 
+interface CountriesResponse {
+  countries: CountryResponseDto[];
+}
+
 export const countriesController = {
   getAllCountries: async (): Promise<CountryResponseDto[]> => {
-    return apiGet<CountryResponseDto[]>("/country");
+    const response = await apiGet<CountriesResponse | CountryResponseDto[]>("/country");
+    // Handle both wrapped response { countries: [...] } and direct array
+    if (Array.isArray(response)) {
+      return response;
+    }
+    if (response && typeof response === "object" && "countries" in response) {
+      return (response as CountriesResponse).countries;
+    }
+    return [];
   },
 
   enableTransactions: async (id: string): Promise<{ message: string }> => {
