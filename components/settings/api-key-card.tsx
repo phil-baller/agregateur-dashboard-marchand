@@ -22,6 +22,7 @@ interface ApiKeyCardProps {
   onDelete: () => void;
   onGenerateSecret: () => void;
   onCreateWebhook: () => void;
+  onDeleteWebhook: (apiKeyId: string, webhook: { id: string; link: string; title?: string }) => void;
   isGeneratingSecret: boolean;
   copiedKeyId: string | null;
   copiedSecretId: string | null;
@@ -33,22 +34,14 @@ export const ApiKeyCard = ({
   onDelete,
   onGenerateSecret,
   onCreateWebhook,
+  onDeleteWebhook,
   isGeneratingSecret,
   copiedKeyId,
   copiedSecretId,
   onCopyKey,
 }: ApiKeyCardProps) => {
-  const { webhooks, deleteWebhook, updateWebhook, isLoading } = useSettingsStore();
+  const { webhooks, updateWebhook, isLoading } = useSettingsStore();
   const apiKeyWebhooks = webhooks[apiKey.id] || [];
-
-  const handleDeleteWebhook = async (webhookId: string) => {
-    try {
-      await deleteWebhook(apiKey.id, webhookId);
-      toast.success("Webhook deleted successfully");
-    } catch (error) {
-      console.error("Failed to delete webhook:", error);
-    }
-  };
 
   const handleUpdateWebhook = async (webhookId: string, data: UpdateWebhookDto) => {
     try {
@@ -192,7 +185,7 @@ export const ApiKeyCard = ({
                   <WebhookItem
                     key={webhook.id}
                     webhook={webhook}
-                    onDelete={() => handleDeleteWebhook(webhook.id)}
+                    onDelete={() => onDeleteWebhook(apiKey.id, webhook)}
                     onUpdate={(data) => handleUpdateWebhook(webhook.id, data)}
                   />
                 ))}

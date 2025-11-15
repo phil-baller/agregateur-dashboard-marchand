@@ -12,45 +12,29 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Building2,
   Key,
-  Loader2,
   Edit,
-  Trash2,
-  RefreshCw,
   Plus,
-  Copy,
-  Webhook,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ApiKeyCard } from "@/components/settings/api-key-card";
+import { EditOrganisationDialog } from "@/components/settings/modals/edit-organisation-dialog";
+import { CreateApiKeyDialog } from "@/components/settings/modals/create-api-key-dialog";
+import { ShowApiKeyDialog } from "@/components/settings/modals/show-api-key-dialog";
+import { CreateWebhookDialog } from "@/components/settings/modals/create-webhook-dialog";
+import { GenerateSecretConfirmDialog } from "@/components/settings/modals/generate-secret-confirm-dialog";
+import { DeleteApiKeyDialog } from "@/components/settings/modals/delete-api-key-dialog";
+import { ShowSecretDialog } from "@/components/settings/modals/show-secret-dialog";
+import { DeleteWebhookDialog } from "@/components/settings/modals/delete-webhook-dialog";
 import type {
   UpdateOrganisationDto,
   GenerateApiKeyOrganisationDto,
@@ -78,6 +62,7 @@ export default function SettingsPage() {
     regenerateApiKeySecret,
     deleteApiKey,
     createWebhook,
+    deleteWebhook,
     fetchWebhooks,
   } = useSettingsStore();
 
@@ -90,8 +75,10 @@ export default function SettingsPage() {
   const [isGenerateSecretConfirmOpen, setIsGenerateSecretConfirmOpen] = useState(false);
   const [isShowSecretDialogOpen, setIsShowSecretDialogOpen] = useState(false);
   const [isDeleteApiKeyDialogOpen, setIsDeleteApiKeyDialogOpen] = useState(false);
+  const [isDeleteWebhookDialogOpen, setIsDeleteWebhookDialogOpen] = useState(false);
   const [isGeneratingSecret, setIsGeneratingSecret] = useState(false);
   const [isDeletingApiKey, setIsDeletingApiKey] = useState(false);
+  const [isDeletingWebhook, setIsDeletingWebhook] = useState(false);
   const [newApiKeyData, setNewApiKeyData] = useState<ApiKeyData | null>(null);
   const [generatedSecret, setGeneratedSecret] = useState<string | null>(null);
   const [apiKeyForSecretGeneration, setApiKeyForSecretGeneration] = useState<string | null>(null);
@@ -99,7 +86,14 @@ export default function SettingsPage() {
     id: string;
     title: string;
   } | null>(null);
-  const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
+  const [webhookToDelete, setWebhookToDelete] = useState<{
+    apiKeyId: string;
+    webhook: {
+      id: string;
+      link: string;
+      title?: string;
+    };
+  } | null>(null);
   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
   const [copiedSecretId, setCopiedSecretId] = useState<string | null>(null);
   const [selectedApiKeyId, setSelectedApiKeyId] = useState<string | null>(null);
@@ -324,17 +318,11 @@ export default function SettingsPage() {
 
   const handleDeleteApiKeyClick = (apiKey: { id: string; title: string }) => {
     setApiKeyToDelete(apiKey);
-    setDeleteConfirmationText("");
     setIsDeleteApiKeyDialogOpen(true);
   };
 
   const handleDeleteApiKey = async () => {
     if (!apiKeyToDelete) {
-      return;
-    }
-
-    if (deleteConfirmationText.trim().toLowerCase() !== "delete") {
-      toast.error("Please type 'delete' to confirm");
       return;
     }
 
@@ -345,7 +333,6 @@ export default function SettingsPage() {
       toast.success("API key deleted successfully");
       setIsDeleteApiKeyDialogOpen(false);
       setApiKeyToDelete(null);
-      setDeleteConfirmationText("");
       // Refresh API keys
       if (organisation?.id) {
         await fetchApiKeys(organisation.id);
@@ -359,6 +346,40 @@ export default function SettingsPage() {
       );
     } finally {
       setIsDeletingApiKey(false);
+    }
+  };
+
+  const handleDeleteWebhookClick = (apiKeyId: string, webhook: { id: string; link: string; title?: string }) => {
+    setWebhookToDelete({
+      apiKeyId,
+      webhook,
+    });
+    setIsDeleteWebhookDialogOpen(true);
+  };
+
+  const handleDeleteWebhook = async () => {
+    if (!webhookToDelete) {
+      return;
+    }
+
+    setIsDeletingWebhook(true);
+
+    try {
+      await deleteWebhook(webhookToDelete.apiKeyId, webhookToDelete.webhook.id);
+      toast.success("Webhook deleted successfully");
+      setIsDeleteWebhookDialogOpen(false);
+      setWebhookToDelete(null);
+      // Refresh webhooks
+      await fetchWebhooks(webhookToDelete.apiKeyId);
+    } catch (error) {
+      console.error("Failed to delete webhook:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete webhook. Please try again."
+      );
+    } finally {
+      setIsDeletingWebhook(false);
     }
   };
 
@@ -495,6 +516,7 @@ export default function SettingsPage() {
                       onDelete={() => handleDeleteApiKeyClick({ id: apiKey.id, title: apiKey.title })}
                       onGenerateSecret={() => handleGenerateSecretClick(apiKey.id)}
                       onCreateWebhook={() => handleOpenCreateWebhookDialog(apiKey.id)}
+                      onDeleteWebhook={handleDeleteWebhookClick}
                       isGeneratingSecret={isGeneratingSecret && apiKeyForSecretGeneration === apiKey.id}
                       copiedKeyId={copiedKeyId}
                       copiedSecretId={copiedSecretId}
@@ -509,159 +531,36 @@ export default function SettingsPage() {
       </Tabs>
 
       {/* Edit Organization Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-              <Building2 className="h-6 w-6 text-primary" />
-            </div>
-            <DialogTitle className="text-2xl">Edit Company Information</DialogTitle>
-            <DialogDescription className="text-base">
-              Update your organization details
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleUpdateOrganisation} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="org-name">Organization Name</Label>
-              <Input
-                id="org-name"
-                value={organisation.libelle}
-                disabled
-                className="bg-muted"
-              />
-              <p className="text-xs text-muted-foreground">
-                Organization name cannot be changed
-              </p>
-            </div>
-
-            {organisation.web_site && (
-              <div className="space-y-2">
-                <Label htmlFor="org-website">Website</Label>
-                <Input
-                  id="org-website"
-                  value={organisation.web_site}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Website cannot be changed
-                </p>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="org-description">Description</Label>
-              <Textarea
-                id="org-description"
-                placeholder="Enter organization description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                disabled={isLoading}
-                rows={4}
-              />
-            </div>
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsEditDialogOpen(false)}
-                disabled={isLoading}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Updating...
-                  </>
-                ) : (
-                  "Update"
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <EditOrganisationDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        organisation={organisation}
+        description={description}
+        onDescriptionChange={setDescription}
+        onSubmit={handleUpdateOrganisation}
+        isLoading={isLoading}
+      />
 
       {/* Create API Key Dialog */}
-      <Dialog
+      <CreateApiKeyDialog
         open={isCreateApiKeyDialogOpen}
-        onOpenChange={setIsCreateApiKeyDialogOpen}
-      >
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-              <Key className="h-6 w-6 text-primary" />
-            </div>
-            <DialogTitle className="text-2xl">Create API Key</DialogTitle>
-            <DialogDescription className="text-base">
-              Generate a new API key for programmatic access to your organization
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleCreateApiKey} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="api-key-title">
-                Title <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="api-key-title"
-                placeholder="e.g., Production API Key"
-                value={apiKeyTitle}
-                onChange={(e) => setApiKeyTitle(e.target.value)}
-                disabled={isLoading}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="api-key-description">Description (Optional)</Label>
-              <Textarea
-                id="api-key-description"
-                placeholder="Enter a description for this API key"
-                value={apiKeyDescription}
-                onChange={(e) => setApiKeyDescription(e.target.value)}
-                disabled={isLoading}
-                rows={3}
-              />
-            </div>
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setIsCreateApiKeyDialogOpen(false);
-                  setApiKeyTitle("");
-                  setApiKeyDescription("");
-                }}
-                disabled={isLoading}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isLoading || !apiKeyTitle.trim()}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  "Create API Key"
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+        onOpenChange={(open) => {
+          setIsCreateApiKeyDialogOpen(open);
+          if (!open) {
+            setApiKeyTitle("");
+            setApiKeyDescription("");
+          }
+        }}
+        title={apiKeyTitle}
+        onTitleChange={setApiKeyTitle}
+        description={apiKeyDescription}
+        onDescriptionChange={setApiKeyDescription}
+        onSubmit={handleCreateApiKey}
+        isLoading={isLoading}
+      />
 
       {/* Show New API Key Dialog */}
-      <Dialog
+      <ShowApiKeyDialog
         open={isShowApiKeyDialogOpen}
         onOpenChange={(open) => {
           if (!open) {
@@ -672,163 +571,37 @@ export default function SettingsPage() {
             }
           }
         }}
-      >
-        <DialogContent className="sm:max-w-[700px]">
-          <DialogHeader>
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/20">
-              <Key className="h-6 w-6 text-green-600 dark:text-green-400" />
-            </div>
-            <DialogTitle className="text-2xl">API Key Created</DialogTitle>
-            <DialogDescription className="text-base">
-              Your API key and secret have been generated. Please copy them now as
-              they will not be shown again.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>API Key</Label>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 text-xs bg-muted px-3 py-2 rounded break-all">
-                  {newApiKeyData?.key}
-                </code>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (newApiKeyData?.key) {
-                      navigator.clipboard.writeText(newApiKeyData.key);
-                      toast.success("API key copied to clipboard");
-                    }
-                  }}
-                  className="shrink-0"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Secret Key</Label>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 text-xs bg-muted px-3 py-2 rounded break-all">
-                  {newApiKeyData?.secret}
-                </code>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (newApiKeyData?.secret) {
-                      navigator.clipboard.writeText(newApiKeyData.secret);
-                      toast.success("Secret key copied to clipboard");
-                    }
-                  }}
-                  className="shrink-0"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-3">
-              <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                <strong>Important:</strong> Store both the API key and secret securely.
-                You will not be able to view the secret again. If you lose it, you'll
-                need to generate a new API key, which will discard the previous one.
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              onClick={() => {
-                setIsShowApiKeyDialogOpen(false);
-                setNewApiKeyData(null);
-                if (organisation?.id) {
-                  fetchApiKeys(organisation.id);
-                }
-              }}
-            >
-              I've copied both keys
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        apiKeyData={newApiKeyData}
+        onConfirm={() => {
+          setIsShowApiKeyDialogOpen(false);
+          setNewApiKeyData(null);
+          if (organisation?.id) {
+            fetchApiKeys(organisation.id);
+          }
+        }}
+      />
 
       {/* Create Webhook Dialog */}
-      <Dialog
+      <CreateWebhookDialog
         open={isCreateWebhookDialogOpen}
-        onOpenChange={setIsCreateWebhookDialogOpen}
-      >
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-              <Webhook className="h-6 w-6 text-primary" />
-            </div>
-            <DialogTitle className="text-2xl">Create Webhook</DialogTitle>
-            <DialogDescription className="text-base">
-              Add a webhook endpoint for this API key
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleCreateWebhook} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="webhook-link">
-                Webhook URL <span className="text-destructive">*</span>
-              </Label>
-              <Input
-                id="webhook-link"
-                type="url"
-                placeholder="https://example.com/webhook"
-                value={webhookLink}
-                onChange={(e) => setWebhookLink(e.target.value)}
-                disabled={isLoading}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="webhook-title">Title (Optional)</Label>
-              <Input
-                id="webhook-title"
-                placeholder="e.g., Payment Notifications"
-                value={webhookTitle}
-                onChange={(e) => setWebhookTitle(e.target.value)}
-                disabled={isLoading}
-              />
-            </div>
-
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setIsCreateWebhookDialogOpen(false);
-                  setWebhookLink("");
-                  setWebhookTitle("");
-                }}
-                disabled={isLoading}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading || !webhookLink.trim()}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  "Create Webhook"
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+        onOpenChange={(open) => {
+          setIsCreateWebhookDialogOpen(open);
+          if (!open) {
+            setWebhookLink("");
+            setWebhookTitle("");
+          }
+        }}
+        link={webhookLink}
+        onLinkChange={setWebhookLink}
+        title={webhookTitle}
+        onTitleChange={setWebhookTitle}
+        onSubmit={handleCreateWebhook}
+        isLoading={isLoading}
+      />
 
 
       {/* Generate Secret Key Confirmation Dialog */}
-      <AlertDialog
+      <GenerateSecretConfirmDialog
         open={isGenerateSecretConfirmOpen}
         onOpenChange={(open) => {
           if (!isGeneratingSecret) {
@@ -838,108 +611,28 @@ export default function SettingsPage() {
             }
           }
         }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-yellow-100 dark:bg-yellow-900/20">
-              <Key className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
-            </div>
-            <AlertDialogTitle className="text-xl">Generate New Secret Key</AlertDialogTitle>
-            <AlertDialogDescription className="text-base">
-              Generating a new secret key will override the previous one. The old secret key
-              will no longer be valid and cannot be recovered. Make sure you have saved your
-              current secret key before proceeding.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isGeneratingSecret}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleGenerateSecret}
-              disabled={isGeneratingSecret}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              {isGeneratingSecret ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                "Generate Secret Key"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onConfirm={handleGenerateSecret}
+        isGenerating={isGeneratingSecret}
+      />
 
       {/* Delete API Key Confirmation Dialog */}
-      <AlertDialog
+      <DeleteApiKeyDialog
         open={isDeleteApiKeyDialogOpen}
         onOpenChange={(open) => {
           if (!isDeletingApiKey) {
             setIsDeleteApiKeyDialogOpen(open);
             if (!open) {
               setApiKeyToDelete(null);
-              setDeleteConfirmationText("");
             }
           }
         }}
-      >
-        <AlertDialogContent className="sm:max-w-[500px]">
-          <AlertDialogHeader>
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/20">
-              <Trash2 className="h-6 w-6 text-red-600 dark:text-red-400" />
-            </div>
-            <AlertDialogTitle className="text-xl">Delete API Key</AlertDialogTitle>
-            <AlertDialogDescription className="text-base">
-              This action cannot be undone. This will permanently delete the API key
-              <strong className="font-semibold"> "{apiKeyToDelete?.title}"</strong> and its
-              associated secret key. All webhooks linked to this API key will also be removed.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="delete-confirmation" className="text-sm font-medium">
-                Type <span className="font-mono text-destructive">delete</span> to confirm:
-              </Label>
-              <Input
-                id="delete-confirmation"
-                placeholder="Type 'delete' to confirm"
-                value={deleteConfirmationText}
-                onChange={(e) => setDeleteConfirmationText(e.target.value)}
-                disabled={isDeletingApiKey}
-                className="font-mono"
-                autoFocus
-              />
-            </div>
-            <div className="rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-3">
-              <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                <strong>Warning:</strong> This action will immediately invalidate the API key
-                and secret. Any applications using this key will stop working.
-              </p>
-            </div>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeletingApiKey}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteApiKey}
-              disabled={isDeletingApiKey || deleteConfirmationText.trim().toLowerCase() !== "delete"}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isDeletingApiKey ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                "Delete API Key"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        apiKey={apiKeyToDelete}
+        onConfirm={handleDeleteApiKey}
+        isDeleting={isDeletingApiKey}
+      />
 
       {/* Show Generated Secret Key Dialog */}
-      <Dialog
+      <ShowSecretDialog
         open={isShowSecretDialogOpen}
         onOpenChange={(open) => {
           if (!open) {
@@ -951,67 +644,32 @@ export default function SettingsPage() {
             }
           }
         }}
-      >
-        <DialogContent className="sm:max-w-[700px]">
-          <DialogHeader>
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/20">
-              <Key className="h-6 w-6 text-green-600 dark:text-green-400" />
-            </div>
-            <DialogTitle className="text-2xl">Secret Key Generated</DialogTitle>
-            <DialogDescription className="text-base">
-              Your new secret key has been generated. Please copy it now as it will not be
-              shown again.
-            </DialogDescription>
-          </DialogHeader>
+        secret={generatedSecret}
+        onConfirm={() => {
+          setIsShowSecretDialogOpen(false);
+          setGeneratedSecret(null);
+          setApiKeyForSecretGeneration(null);
+          if (organisation?.id) {
+            fetchApiKeys(organisation.id);
+          }
+        }}
+      />
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>Secret Key</Label>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 text-xs bg-muted px-3 py-2 rounded break-all">
-                  {generatedSecret}
-                </code>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (generatedSecret) {
-                      navigator.clipboard.writeText(generatedSecret);
-                      toast.success("Secret key copied to clipboard");
-                    }
-                  }}
-                  className="shrink-0"
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 p-3">
-              <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                <strong>Important:</strong> Store this secret key securely. You will not be
-                able to view it again. If you lose it, you'll need to generate a new secret
-                key, which will override this one.
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              onClick={() => {
-                setIsShowSecretDialogOpen(false);
-                setGeneratedSecret(null);
-                setApiKeyForSecretGeneration(null);
-                if (organisation?.id) {
-                  fetchApiKeys(organisation.id);
-                }
-              }}
-            >
-              I've copied the secret key
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Delete Webhook Dialog */}
+      <DeleteWebhookDialog
+        open={isDeleteWebhookDialogOpen}
+        onOpenChange={(open) => {
+          if (!isDeletingWebhook) {
+            setIsDeleteWebhookDialogOpen(open);
+            if (!open) {
+              setWebhookToDelete(null);
+            }
+          }
+        }}
+        webhook={webhookToDelete?.webhook || null}
+        onConfirm={handleDeleteWebhook}
+        isDeleting={isDeletingWebhook}
+      />
     </div>
   );
 }
