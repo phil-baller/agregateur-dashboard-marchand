@@ -5,6 +5,7 @@ import { usePaymentsStore } from "@/stores/payments.store";
 import { useMobileServicesStore } from "@/stores/mobile-services.store";
 import { useAuthStore } from "@/stores/auth.store";
 import { PaymentsTable } from "@/components/shared/payments-table";
+import { PaymentDetailsSheet } from "@/components/shared/payment-details-sheet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -61,6 +62,24 @@ export default function PaymentsPage() {
   const [paymentToDelete, setPaymentToDelete] = useState<{ id: string; reference?: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isCreatingDirectPayment, setIsCreatingDirectPayment] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<{
+    id: string;
+    reference?: string;
+    amount: number;
+    description?: string;
+    status: string;
+    transaction_type?: string;
+    createdAt?: string;
+    launch_url?: string;
+    organisation?: {
+      id: string;
+      libelle?: string;
+      description?: string;
+      [key: string]: unknown;
+    };
+    [key: string]: unknown;
+  } | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const directPaymentForm = useForm<DirectPaymentFormData>({
     defaultValues: {
@@ -77,6 +96,27 @@ export default function PaymentsPage() {
       fetchServices();
     }
   }, [isAuthenticated, fetchPayments, fetchServices]);
+
+  const handleRowClick = (payment: {
+    id: string;
+    reference?: string;
+    amount: number;
+    description?: string;
+    status: string;
+    transaction_type?: string;
+    createdAt?: string;
+    launch_url?: string;
+    organisation?: {
+      id: string;
+      libelle?: string;
+      description?: string;
+      [key: string]: unknown;
+    };
+    [key: string]: unknown;
+  }) => {
+    setSelectedPayment(payment);
+    setSheetOpen(true);
+  };
 
   const handleDeleteClick = (id: string, reference?: string) => {
     setPaymentToDelete({ id, reference });
@@ -481,6 +521,7 @@ export default function PaymentsPage() {
             >
               <PaymentsTable
                 data={safePayments}
+                onRowClick={handleRowClick}
                 onDelete={handleDeleteClick}
                 isLoading={isLoading}
                 pagination={pagination}
@@ -490,6 +531,14 @@ export default function PaymentsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Payment Details Sheet */}
+      <PaymentDetailsSheet
+        payment={selectedPayment}
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        onDelete={handleDeleteClick}
+      />
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

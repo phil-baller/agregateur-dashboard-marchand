@@ -39,6 +39,7 @@ interface PaymentsTableProps {
   data: Payment[];
   onView?: (id: string) => void;
   onDelete?: (id: string, reference?: string) => void;
+  onRowClick?: (payment: Payment) => void;
   isLoading?: boolean;
   pagination?: {
     page: number;
@@ -61,6 +62,7 @@ export const PaymentsTable = ({
   data,
   onView,
   onDelete,
+  onRowClick,
   isLoading = false,
   pagination,
   onPaginationChange,
@@ -261,6 +263,6 @@ export const PaymentsTable = ({
     }
   }, [table.getState().pagination.pageIndex, table.getState().pagination.pageSize]);
 
-  return <DataTable table={table} />;
+  return <DataTable table={table} onRowClick={onRowClick} />;
 };
 
