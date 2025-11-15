@@ -52,8 +52,8 @@ export default function ForgotPasswordPage() {
   };
 
   const handleVerifyOtp = async () => {
-    if (!otp || otp.length !== 6) {
-      toast.error("Please enter a valid 6-digit OTP code");
+    if (!otp || otp.length !== 4) {
+      toast.error("Please enter a valid 4-digit OTP code");
       return;
     }
 
@@ -97,7 +97,7 @@ export default function ForgotPasswordPage() {
       return;
     }
 
-    if (!otp || otp.length !== 6) {
+    if (!otp || otp.length !== 4) {
       toast.error("OTP code is missing. Please start over.");
       return;
     }
@@ -155,7 +155,7 @@ export default function ForgotPasswordPage() {
             </CardTitle>
             <CardDescription>
               {currentStep === "email" && "Enter your email address to receive an OTP code"}
-              {currentStep === "otp" && "Enter the 6-digit OTP code sent to your email"}
+              {currentStep === "otp" && "Enter the 4-digit OTP code sent to your email"}
               {currentStep === "password" && "Enter your new password"}
             </CardDescription>
           </CardHeader>
@@ -219,11 +219,11 @@ export default function ForgotPasswordPage() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                     <Shield className="h-4 w-4" />
-                    <span>Enter the 6-digit OTP code</span>
+                    <span>Enter the 4-digit OTP code</span>
                   </div>
                   <div className="flex justify-center">
                     <InputOTP
-                      maxLength={6}
+                      maxLength={4}
                       value={otp}
                       onChange={(value) => setOtp(value)}
                       disabled={isVerifyingOtp || isLoading}
@@ -233,8 +233,6 @@ export default function ForgotPasswordPage() {
                         <InputOTPSlot index={1} />
                         <InputOTPSlot index={2} />
                         <InputOTPSlot index={3} />
-                        <InputOTPSlot index={4} />
-                        <InputOTPSlot index={5} />
                       </InputOTPGroup>
                     </InputOTP>
                   </div>
@@ -257,7 +255,7 @@ export default function ForgotPasswordPage() {
                   <Button
                     type="button"
                     onClick={handleVerifyOtp}
-                    disabled={isVerifyingOtp || isLoading || otp.length !== 6}
+                    disabled={isVerifyingOtp || isLoading || otp.length !== 4}
                     className="flex-1"
                   >
                     {isVerifyingOtp || isLoading ? (

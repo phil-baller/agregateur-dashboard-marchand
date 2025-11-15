@@ -129,8 +129,8 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           const response = await authController.forgotPassword({ email });
-          // Response contains user with id
-          const userId = response.user?.id;
+          // Response structure: { user_id: string }
+          const userId = response.user_id;
           if (!userId) {
             throw new Error("User ID not found in response");
           }
