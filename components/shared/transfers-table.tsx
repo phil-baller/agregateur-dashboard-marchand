@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import * as React from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "@/components/data-table/data-table";
 import { useDataTable } from "@/hooks/use-data-table";
@@ -16,12 +17,15 @@ import { MoreHorizontal, Eye } from "lucide-react";
 interface Transfer {
   id: string;
   amount: number;
-  name: string;
-  phone: string;
-  service_mobile_code: string;
+  reference?: string;
   status?: string;
   createdAt?: string;
-  reference?: string;
+  beneficiary?: {
+    id: string;
+    name?: string | null;
+    phone?: string;
+    [key: string]: unknown;
+  };
   service_mobile?: {
     id: string;
     name?: string;
@@ -39,7 +43,14 @@ interface Transfer {
 interface TransfersTableProps {
   data: Transfer[];
   onView?: (transfer: Transfer) => void;
+  onRowClick?: (transfer: Transfer) => void;
   isLoading?: boolean;
+  pagination?: {
+    page: number;
+    size: number;
+    total: number;
+  };
+  onPaginationChange?: (page: number, size: number) => void;
 }
 
 const statusColors: Record<string, string> = {
@@ -52,21 +63,37 @@ const statusColors: Record<string, string> = {
 export const TransfersTable = ({
   data,
   onView,
+  onRowClick,
   isLoading = false,
+  pagination,
+  onPaginationChange,
 }: TransfersTableProps) => {
   const columns = useMemo<ColumnDef<Transfer>[]>(
     () => [
       {
-        accessorKey: "name",
+        accessorKey: "reference",
+        header: "Reference",
+        cell: ({ row }) => (
+          <div className="font-medium font-mono text-sm">
+            {row.original.reference || row.original.id.slice(-8)}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "beneficiary",
         header: "Recipient",
         cell: ({ row }) => (
-          <div className="font-medium">{row.original.name}</div>
+          <div className="font-medium">
+            {row.original.beneficiary?.name || "-"}
+          </div>
         ),
       },
       {
         accessorKey: "phone",
         header: "Phone",
-        cell: ({ row }) => <div>{row.original.phone}</div>,
+        cell: ({ row }) => (
+          <div>{row.original.beneficiary?.phone || "-"}</div>
+        ),
       },
       {
         accessorKey: "amount",
@@ -86,11 +113,11 @@ export const TransfersTable = ({
         },
       },
       {
-        accessorKey: "service_mobile_code",
+        accessorKey: "service_mobile",
         header: "Service",
         cell: ({ row }) => (
           <Badge variant="secondary">
-            {row.original.service_mobile_code}
+            {row.original.service_mobile?.name || row.original.service_mobile?.code_prefix || "-"}
           </Badge>
         ),
       },
@@ -115,7 +142,11 @@ export const TransfersTable = ({
         cell: ({ row }) => {
           const date = row.original.createdAt;
           if (!date) return "-";
-          return new Date(date as string).toLocaleDateString();
+          return new Date(date as string).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          });
         },
       },
       {
@@ -123,16 +154,29 @@ export const TransfersTable = ({
         cell: ({ row }) => (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
+              <Button 
+                variant="ghost" 
+                className="h-8 w-8 p-0"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <span className="sr-only">Open menu</span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              {onView && (
-                <DropdownMenuItem onClick={() => onView(row.original)}>
+              {(onView || onRowClick) && (
+                <DropdownMenuItem 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (onRowClick) {
+                      onRowClick(row.original);
+                    } else if (onView) {
+                      onView(row.original);
+                    }
+                  }}
+                >
                   <Eye className="mr-2 h-4 w-4" />
-                  View
+                  View Details
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -140,19 +184,61 @@ export const TransfersTable = ({
         ),
       },
     ],
-    [onView]
+    [onView, onRowClick]
   );
+
+  const pageCount = pagination
+    ? Math.ceil(pagination.total / pagination.size)
+    : Math.ceil(data.length / 10);
 
   const { table } = useDataTable({
     data,
     columns,
-    pageCount: Math.ceil(data.length / 10),
+    pageCount,
+    initialState: {
+      pagination: pagination
+        ? {
+            pageIndex: pagination.page - 1,
+            pageSize: pagination.size,
+          }
+        : undefined,
+    },
   });
+
+  const prevPaginationRef = React.useRef({
+    pageIndex: pagination ? pagination.page - 1 : 0,
+    pageSize: pagination?.size || 10,
+  });
+  
+  React.useEffect(() => {
+    if (!onPaginationChange || !pagination) return;
+    
+    const currentPageIndex = table.getState().pagination.pageIndex;
+    const currentPageSize = table.getState().pagination.pageSize;
+    const prevPageIndex = prevPaginationRef.current.pageIndex;
+    const prevPageSize = prevPaginationRef.current.pageSize;
+    
+    if (
+      (currentPageIndex !== prevPageIndex || currentPageSize !== prevPageSize) &&
+      (currentPageIndex + 1 !== pagination.page || currentPageSize !== pagination.size)
+    ) {
+      onPaginationChange(currentPageIndex + 1, currentPageSize);
+      prevPaginationRef.current = { pageIndex: currentPageIndex, pageSize: currentPageSize };
+    }
+  }, [table.getState().pagination.pageIndex, table.getState().pagination.pageSize, onPaginationChange, pagination]);
+
+  const handleRowClick = (transfer: Transfer) => {
+    if (onRowClick) {
+      onRowClick(transfer);
+    } else if (onView) {
+      onView(transfer);
+    }
+  };
 
   return (
     <DataTable
       table={table}
-      onRowClick={onView ? (row) => onView(row.original as Transfer) : undefined}
+      onRowClick={handleRowClick}
     />
   );
 };

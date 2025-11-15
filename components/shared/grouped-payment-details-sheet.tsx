@@ -105,16 +105,30 @@ export const GroupedPaymentDetailsSheet = ({
             <h3 className="text-sm font-semibold text-foreground">Group Payment Information</h3>
             <Card>
               <CardContent className="pt-4 space-y-4">
-                {/* Reason */}
-                {groupedPayment.reason && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      <FileText className="h-3.5 w-3.5" />
-                      Reason
-                    </div>
-                    <p className="text-sm font-medium">{groupedPayment.reason}</p>
+                {/* ID */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    <Hash className="h-3.5 w-3.5" />
+                    ID
                   </div>
-                )}
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 rounded-md border bg-muted px-3 py-2 font-mono text-sm">
+                      {groupedPayment.id}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="h-9 w-9 shrink-0"
+                      onClick={() => handleCopy(groupedPayment.id, "id")}
+                    >
+                      {copied === "id" ? (
+                        <Check className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
 
                 {/* Reference */}
                 {groupedPayment.reference && (
@@ -143,6 +157,15 @@ export const GroupedPaymentDetailsSheet = ({
                   </div>
                 )}
 
+                {/* Reason */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    <FileText className="h-3.5 w-3.5" />
+                    Reason
+                  </div>
+                  <p className="text-sm font-medium">{groupedPayment.reason || "-"}</p>
+                </div>
+
                 {/* Currency */}
                 {groupedPayment.currency && (
                   <div className="space-y-2">
@@ -158,32 +181,31 @@ export const GroupedPaymentDetailsSheet = ({
 
           {/* Organisation */}
           {groupedPayment.organisation && (
-            <>
-              <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-foreground">Organisation</h3>
-                <Card>
-                  <CardContent className="pt-4 space-y-3">
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                        <Building2 className="h-3.5 w-3.5" />
-                        Name
-                      </div>
-                      <p className="text-sm font-medium">{groupedPayment.organisation.libelle || "-"}</p>
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground">Organisation</h3>
+              <Card>
+                <CardContent className="pt-4 space-y-3">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      <Building2 className="h-3.5 w-3.5" />
+                      Name
                     </div>
-                    {groupedPayment.organisation.description && (
-                      <div className="space-y-1.5">
-                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Description</div>
-                        <p className="text-sm text-muted-foreground">
-                          {groupedPayment.organisation.description}
-                        </p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-              <Separator />
-            </>
+                    <p className="text-sm font-medium">{groupedPayment.organisation.libelle || "-"}</p>
+                  </div>
+                  {groupedPayment.organisation.description && (
+                    <div className="space-y-1.5">
+                      <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Description</div>
+                      <p className="text-sm text-muted-foreground">
+                        {groupedPayment.organisation.description}
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           )}
+
+          {groupedPayment.organisation && <Separator />}
 
           {/* Payment Link */}
           {groupedPayment.launch_url && (
@@ -242,26 +264,6 @@ export const GroupedPaymentDetailsSheet = ({
                       Created At
                     </div>
                     <p className="text-sm">{formattedDate}</p>
-                  </div>
-                )}
-                {groupedPayment.id && (
-                  <div className="space-y-1.5">
-                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Group Payment ID</div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs font-mono text-muted-foreground break-all">{groupedPayment.id}</p>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 shrink-0"
-                        onClick={() => handleCopy(groupedPayment.id, "group-payment-id")}
-                      >
-                        {copied === "group-payment-id" ? (
-                          <Check className="h-3.5 w-3.5 text-green-600" />
-                        ) : (
-                          <Copy className="h-3.5 w-3.5" />
-                        )}
-                      </Button>
-                    </div>
                   </div>
                 )}
               </CardContent>

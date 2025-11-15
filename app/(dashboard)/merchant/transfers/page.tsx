@@ -18,12 +18,15 @@ import type { CreateTransfertDto } from "@/types/api";
 interface Transfer {
   id: string;
   amount: number;
-  name: string;
-  phone: string;
-  service_mobile_code: string;
+  reference?: string;
   status?: string;
   createdAt?: string;
-  reference?: string;
+  beneficiary?: {
+    id: string;
+    name?: string | null;
+    phone?: string;
+    [key: string]: unknown;
+  };
   service_mobile?: {
     id: string;
     name?: string;
@@ -39,7 +42,7 @@ interface Transfer {
 }
 
 export default function TransfersPage() {
-  const { transfers, isLoading, fetchTransfers, initializeTransfer, fetchTransferById } = useTransfersStore();
+  const { transfers, isLoading, pagination, fetchTransfers, initializeTransfer } = useTransfersStore();
   const { isAuthenticated } = useAuthStore();
   const { services, fetchServices } = useMobileServicesStore();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -67,17 +70,9 @@ export default function TransfersPage() {
     }
   };
 
-  const handleRowClick = async (transfer: Transfer) => {
-    try {
-      await fetchTransferById(transfer.id);
-      const updatedTransfer = useTransfersStore.getState().selectedTransfer;
-      setSelectedTransfer(updatedTransfer as Transfer);
-      setSheetOpen(true);
-    } catch (error) {
-      toast.error("Failed to load transfer details");
-      setSelectedTransfer(transfer);
-      setSheetOpen(true);
-    }
+  const handleRowClick = (transfer: Transfer) => {
+    setSelectedTransfer(transfer);
+    setSheetOpen(true);
   };
 
   return (
@@ -172,7 +167,9 @@ export default function TransfersPage() {
               <TransfersTable
                 data={Array.isArray(transfers) ? transfers : []}
                 isLoading={isLoading}
-                onView={handleRowClick}
+                onRowClick={handleRowClick}
+                pagination={pagination}
+                onPaginationChange={(page, size) => fetchTransfers({ page, size })}
               />
             </Suspense>
           )}

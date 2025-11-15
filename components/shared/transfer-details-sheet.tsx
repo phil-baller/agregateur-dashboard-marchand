@@ -18,12 +18,15 @@ import { toast } from "sonner";
 interface Transfer {
   id: string;
   amount: number;
-  name: string;
-  phone: string;
-  service_mobile_code: string;
+  reference?: string;
   status?: string;
   createdAt?: string;
-  reference?: string;
+  beneficiary?: {
+    id: string;
+    name?: string | null;
+    phone?: string;
+    [key: string]: unknown;
+  };
   service_mobile?: {
     id: string;
     name?: string;
@@ -176,47 +179,70 @@ export const TransferDetailsSheet = ({
           <Separator />
 
           {/* Recipient Information */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">Recipient</h3>
-            <Card>
-              <CardContent className="pt-4 space-y-3">
-                {transfer.name && (
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      <User className="h-3.5 w-3.5" />
-                      Name
-                    </div>
-                    <p className="text-sm font-medium">{transfer.name}</p>
-                  </div>
-                )}
-                {transfer.phone && (
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      <Phone className="h-3.5 w-3.5" />
-                      Phone Number
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-mono">{transfer.phone}</p>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 shrink-0"
-                        onClick={() => handleCopy(transfer.phone, "recipient-phone")}
-                      >
-                        {copied === "recipient-phone" ? (
-                          <Check className="h-3.5 w-3.5 text-green-600" />
-                        ) : (
-                          <Copy className="h-3.5 w-3.5" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          <Separator />
+          {transfer.beneficiary && (
+            <>
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-foreground">Recipient</h3>
+                <Card>
+                  <CardContent className="pt-4 space-y-3">
+                    {transfer.beneficiary.name && (
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          <User className="h-3.5 w-3.5" />
+                          Name
+                        </div>
+                        <p className="text-sm font-medium">{transfer.beneficiary.name}</p>
+                      </div>
+                    )}
+                    {transfer.beneficiary.phone && (
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          <Phone className="h-3.5 w-3.5" />
+                          Phone Number
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-mono">{transfer.beneficiary.phone}</p>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 shrink-0"
+                            onClick={() => handleCopy(transfer.beneficiary!.phone!, "recipient-phone")}
+                          >
+                            {copied === "recipient-phone" ? (
+                              <Check className="h-3.5 w-3.5 text-green-600" />
+                            ) : (
+                              <Copy className="h-3.5 w-3.5" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    {transfer.beneficiary.id && (
+                      <div className="space-y-1.5">
+                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Beneficiary ID</div>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs font-mono text-muted-foreground break-all">{transfer.beneficiary.id}</p>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 shrink-0"
+                            onClick={() => handleCopy(transfer.beneficiary!.id, "beneficiary-id")}
+                          >
+                            {copied === "beneficiary-id" ? (
+                              <Check className="h-3.5 w-3.5 text-green-600" />
+                            ) : (
+                              <Copy className="h-3.5 w-3.5" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+              <Separator />
+            </>
+          )}
 
           {/* Service Mobile Information */}
           {transfer.service_mobile && (
@@ -242,14 +268,6 @@ export const TransferDetailsSheet = ({
                         </Badge>
                       </div>
                     )}
-                    {transfer.service_mobile_code && (
-                      <div className="space-y-1.5">
-                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Service Code</div>
-                        <Badge variant="outline" className="font-mono">
-                          {transfer.service_mobile_code}
-                        </Badge>
-                      </div>
-                    )}
                     {transfer.service_mobile.isActive !== undefined && (
                       <div className="space-y-1.5">
                         <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Status</div>
@@ -258,26 +276,6 @@ export const TransferDetailsSheet = ({
                         </Badge>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
-              </div>
-              <Separator />
-            </>
-          )}
-
-          {/* Service Code (if service_mobile not available) */}
-          {!transfer.service_mobile && transfer.service_mobile_code && (
-            <>
-              <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-foreground">Mobile Service</h3>
-                <Card>
-                  <CardContent className="pt-4 space-y-3">
-                    <div className="space-y-1.5">
-                      <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Service Code</div>
-                      <Badge variant="outline" className="font-mono">
-                        {transfer.service_mobile_code}
-                      </Badge>
-                    </div>
                   </CardContent>
                 </Card>
               </div>

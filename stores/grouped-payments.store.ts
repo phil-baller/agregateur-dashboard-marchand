@@ -217,4 +217,3 @@ export const useGroupedPaymentsStore = create<GroupedPaymentsState>((set, get) =
     });
   },
 }));
-
