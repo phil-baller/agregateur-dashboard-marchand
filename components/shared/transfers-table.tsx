@@ -21,12 +21,24 @@ interface Transfer {
   service_mobile_code: string;
   status?: string;
   createdAt?: string;
+  reference?: string;
+  service_mobile?: {
+    id: string;
+    name?: string;
+    country?: string;
+    code_prefix?: string;
+    api_endpoint?: string | null;
+    isActive?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+    [key: string]: unknown;
+  };
   [key: string]: unknown;
 }
 
 interface TransfersTableProps {
   data: Transfer[];
-  onView?: (id: string) => void;
+  onView?: (transfer: Transfer) => void;
   isLoading?: boolean;
 }
 
@@ -118,7 +130,7 @@ export const TransfersTable = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {onView && (
-                <DropdownMenuItem onClick={() => onView(row.original.id)}>
+                <DropdownMenuItem onClick={() => onView(row.original)}>
                   <Eye className="mr-2 h-4 w-4" />
                   View
                 </DropdownMenuItem>
@@ -137,6 +149,11 @@ export const TransfersTable = ({
     pageCount: Math.ceil(data.length / 10),
   });
 
-  return <DataTable table={table} />;
+  return (
+    <DataTable
+      table={table}
+      onRowClick={onView ? (row) => onView(row.original) : undefined}
+    />
+  );
 };
 
