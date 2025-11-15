@@ -3,6 +3,7 @@ export { authController } from "./auth.controller";
 export { paymentsController } from "./payments.controller";
 export { usersController } from "./users.controller";
 export { organisationsController } from "./organisations.controller";
+export { apiKeysController } from "./api-keys.controller";
 export { beneficiariesController } from "./beneficiaries.controller";
 export { countriesController } from "./countries.controller";
 export { mobileServicesController } from "./mobile-services.controller";

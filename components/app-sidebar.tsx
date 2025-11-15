@@ -44,11 +44,6 @@ import {
 const getNavigationForRole = (role: UserRole | null) => {
   const baseNavSecondary = [
     {
-      title: "Settings",
-      url: "#",
-      icon: IconSettings,
-    },
-    {
       title: "Get Help",
       url: "#",
       icon: IconHelp,
@@ -103,6 +98,11 @@ const getNavigationForRole = (role: UserRole | null) => {
             title: "Transfers",
             url: "/merchant/transfers",
             icon: IconTransfer,
+          },
+          {
+            title: "Settings",
+            url: "/merchant/settings",
+            icon: IconSettings,
           },
         ],
         navSecondary: baseNavSecondary,
