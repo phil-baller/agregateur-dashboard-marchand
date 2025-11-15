@@ -34,10 +34,13 @@ export const groupedPaymentsController = {
     }
     
     // Set default date range if not provided (last 30 days)
-    const now = Date.now();
-    const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000);
-    queryParams.dateFrom = params?.dateFrom || thirtyDaysAgo;
-    queryParams.dateTo = params?.dateTo || now;
+    // Ensure dates are integers (Unix timestamps in milliseconds)
+    const now = Math.floor(Date.now());
+    const thirtyDaysAgo = Math.floor(now - (30 * 24 * 60 * 60 * 1000));
+    
+    // Always provide dateFrom and dateTo as required by API
+    queryParams.dateFrom = params?.dateFrom ? Math.floor(params.dateFrom) : thirtyDaysAgo;
+    queryParams.dateTo = params?.dateTo ? Math.floor(params.dateTo) : now;
     
     return apiGet("/grouped-payments", queryParams);
   },
@@ -62,14 +65,16 @@ export const groupedPaymentsController = {
     if (filters) {
       queryParams.transaction_type = filters.transaction_type;
       queryParams.status = filters.status;
-      queryParams.dateFrom = filters.dateFrom;
-      queryParams.dateTo = filters.dateTo;
+      // Ensure dates are integers (Unix timestamps in milliseconds)
+      queryParams.dateFrom = Math.floor(filters.dateFrom);
+      queryParams.dateTo = Math.floor(filters.dateTo);
     } else {
       // Default to all payment types and all statuses
       queryParams.transaction_type = "PAYMENT";
       queryParams.status = "INIT";
-      const now = Date.now();
-      const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000);
+      // Ensure dates are integers (Unix timestamps in milliseconds)
+      const now = Math.floor(Date.now());
+      const thirtyDaysAgo = Math.floor(now - (30 * 24 * 60 * 60 * 1000));
       queryParams.dateFrom = thirtyDaysAgo;
       queryParams.dateTo = now;
     }

@@ -48,8 +48,9 @@ export default function GroupedPaymentDetailsPage() {
     
     setIsLoading(true);
     try {
-      const now = Date.now();
-      const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000);
+      // Ensure dates are integers (Unix timestamps in milliseconds)
+      const now = Math.floor(Date.now());
+      const thirtyDaysAgo = Math.floor(now - (30 * 24 * 60 * 60 * 1000));
       
       const filters: FilterDto = {
         transaction_type: "PAYMENT",
