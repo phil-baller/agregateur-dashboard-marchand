@@ -16,11 +16,11 @@ import { toast } from "sonner";
 import { Loader2, ArrowLeft, ArrowRight, Shield, Mail, Lock } from "lucide-react";
 import Link from "next/link";
 
-type WizardStep = "email" | "otp" | "password";
+type WizardStep = "email" | "password";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
-  const { sendPasswordResetOtp, verifyPasswordResetOtp, resetPassword, isLoading } = useAuthStore();
+  const { sendPasswordResetOtp, resetPassword, isLoading } = useAuthStore();
   const [currentStep, setCurrentStep] = useState<WizardStep>("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -28,7 +28,6 @@ export default function ForgotPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
-  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   const handleSendOtp = async (e: React.FormEvent) => {
@@ -42,35 +41,12 @@ export default function ForgotPasswordPage() {
     try {
       const id = await sendPasswordResetOtp(email);
       setUserId(id);
-      setCurrentStep("otp");
+      setCurrentStep("password");
       toast.success("OTP sent to your email address");
     } catch (error) {
       toast.error("Failed to send OTP. Please check your email and try again.");
     } finally {
       setIsSendingOtp(false);
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-    if (!otp || otp.length !== 4) {
-      toast.error("Please enter a valid 4-digit OTP code");
-      return;
-    }
-
-    if (!userId) {
-      toast.error("User ID is missing. Please start over.");
-      return;
-    }
-
-    setIsVerifyingOtp(true);
-    try {
-      await verifyPasswordResetOtp(userId, otp);
-      setCurrentStep("password");
-      toast.success("OTP verified successfully");
-    } catch (error) {
-      toast.error("Invalid OTP code. Please try again.");
-    } finally {
-      setIsVerifyingOtp(false);
     }
   };
 
@@ -98,7 +74,7 @@ export default function ForgotPasswordPage() {
     }
 
     if (!otp || otp.length !== 4) {
-      toast.error("OTP code is missing. Please start over.");
+      toast.error("Please enter a valid 4-digit OTP code");
       return;
     }
 
@@ -110,20 +86,19 @@ export default function ForgotPasswordPage() {
         router.push("/login");
       }, 1500);
     } catch (error) {
-      toast.error("Failed to reset password. Please try again.");
+      toast.error("Failed to reset password. Please check your OTP and try again.");
     } finally {
       setIsResettingPassword(false);
     }
   };
 
   const handleBack = () => {
-    if (currentStep === "otp") {
+    if (currentStep === "password") {
       setCurrentStep("email");
-      setOtp("");
-    } else if (currentStep === "password") {
-      setCurrentStep("otp");
       setPassword("");
       setConfirmPassword("");
+      setOtp("");
+      setUserId(null);
     }
   };
 
@@ -150,13 +125,11 @@ export default function ForgotPasswordPage() {
           <CardHeader>
             <CardTitle>
               {currentStep === "email" && "Reset Password"}
-              {currentStep === "otp" && "Verify OTP"}
               {currentStep === "password" && "Set New Password"}
             </CardTitle>
             <CardDescription>
               {currentStep === "email" && "Enter your email address to receive an OTP code"}
-              {currentStep === "otp" && "Enter the 4-digit OTP code sent to your email"}
-              {currentStep === "password" && "Enter your new password"}
+              {currentStep === "password" && "Enter the OTP code sent to your email and your new password"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -207,8 +180,8 @@ export default function ForgotPasswordPage() {
               </form>
             )}
 
-            {currentStep === "otp" && (
-              <div className="space-y-6">
+            {currentStep === "password" && (
+              <form onSubmit={handleResetPassword} className="space-y-4">
                 <div className="rounded-lg border bg-muted/50 p-4">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Mail className="h-4 w-4" />
@@ -217,77 +190,31 @@ export default function ForgotPasswordPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                    <Shield className="h-4 w-4" />
-                    <span>Enter the 4-digit OTP code</span>
+                  <div className="space-y-2">
+                    <Label htmlFor="otp">OTP Code *</Label>
+                    <div className="flex justify-center">
+                      <InputOTP
+                        maxLength={4}
+                        value={otp}
+                        onChange={(value) => setOtp(value)}
+                        disabled={isResettingPassword || isLoading}
+                      >
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} />
+                          <InputOTPSlot index={1} />
+                          <InputOTPSlot index={2} />
+                          <InputOTPSlot index={3} />
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </div>
+                    <p className="text-center text-xs text-muted-foreground">
+                      Enter the 4-digit OTP code sent to your email
+                    </p>
                   </div>
-                  <div className="flex justify-center">
-                    <InputOTP
-                      maxLength={4}
-                      value={otp}
-                      onChange={(value) => setOtp(value)}
-                      disabled={isVerifyingOtp || isLoading}
-                    >
-                      <InputOTPGroup>
-                        <InputOTPSlot index={0} />
-                        <InputOTPSlot index={1} />
-                        <InputOTPSlot index={2} />
-                        <InputOTPSlot index={3} />
-                      </InputOTPGroup>
-                    </InputOTP>
-                  </div>
-                  <p className="text-center text-xs text-muted-foreground">
-                    Check your email for the OTP code
-                  </p>
                 </div>
 
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleBack}
-                    disabled={isVerifyingOtp || isLoading}
-                    className="flex-1"
-                  >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Back
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={handleVerifyOtp}
-                    disabled={isVerifyingOtp || isLoading || otp.length !== 4}
-                    className="flex-1"
-                  >
-                    {isVerifyingOtp || isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Verifying...
-                      </>
-                    ) : (
-                      <>
-                        Verify
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                </div>
-
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={handleStartOver}
-                    className="text-sm text-muted-foreground hover:text-foreground hover:underline"
-                  >
-                    Use a different email
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {currentStep === "password" && (
-              <form onSubmit={handleResetPassword} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="password">New Password</Label>
+                  <Label htmlFor="password">New Password *</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -338,7 +265,7 @@ export default function ForgotPasswordPage() {
                   </Button>
                   <Button
                     type="submit"
-                    disabled={isResettingPassword || isLoading || !password || !confirmPassword || password !== confirmPassword}
+                    disabled={isResettingPassword || isLoading || !password || !confirmPassword || password !== confirmPassword || otp.length !== 4}
                     className="flex-1"
                   >
                     {isResettingPassword || isLoading ? (
@@ -353,6 +280,17 @@ export default function ForgotPasswordPage() {
                       </>
                     )}
                   </Button>
+                </div>
+
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={handleStartOver}
+                    className="text-sm text-muted-foreground hover:text-foreground hover:underline"
+                    disabled={isResettingPassword || isLoading}
+                  >
+                    Use a different email
+                  </button>
                 </div>
               </form>
             )}

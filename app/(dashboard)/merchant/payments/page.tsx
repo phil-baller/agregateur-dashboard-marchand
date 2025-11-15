@@ -16,7 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Zap, RefreshCw, CreditCard, Clock, Link2, Settings, Phone, Receipt, CheckCircle2, XCircle, Users } from "lucide-react";
+import { Zap, Settings, Phone, Receipt, CheckCircle2, XCircle, Users } from "lucide-react";
 import Link from "next/link";
 import {
   Dialog,

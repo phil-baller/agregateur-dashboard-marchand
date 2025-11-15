@@ -40,7 +40,6 @@ interface AuthState {
   }) => Promise<void>;
   logout: () => Promise<void>;
   sendPasswordResetOtp: (email: string) => Promise<string>;
-  verifyPasswordResetOtp: (userId: string, otpCode: string) => Promise<void>;
   resetPassword: (userId: string, password: string, otpCode: string) => Promise<void>;
   setUser: (user: UserDto | null) => void;
   clearError: () => void;
@@ -136,20 +135,6 @@ export const useAuthStore = create<AuthState>()(
           }
           set({ isLoading: false });
           return userId;
-        } catch (error) {
-          set({ isLoading: false });
-          throw error;
-        }
-      },
-
-      verifyPasswordResetOtp: async (userId: string, otpCode: string): Promise<void> => {
-        set({ isLoading: true, error: null });
-        try {
-          await authController.verifyPasswordOtp({
-            user_id: userId,
-            otp_code: otpCode,
-          });
-          set({ isLoading: false });
         } catch (error) {
           set({ isLoading: false });
           throw error;

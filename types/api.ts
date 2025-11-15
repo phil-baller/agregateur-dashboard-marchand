@@ -183,6 +183,7 @@ export interface CreateTransfertDto {
   name: string;
   phone: string;
   service_mobile_code: string;
+  otp_code: string;
 }
 
 // Grouped Payment Types

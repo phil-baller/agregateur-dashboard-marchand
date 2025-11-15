@@ -1,6 +1,460 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IAppErrorDto"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IAppErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "5XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IAppErrorDto"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IAppErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IAppErrorDto"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IAppErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Register a new user",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/{id}/update": {
+      "post": {
+        "operationId": "AuthController_completeUserProfile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IAppErrorDto"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IAppErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Update a user",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/forgot-password/send-otp": {
+      "post": {
+        "operationId": "AuthController_forgotPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAuthenticationOtpDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IAppErrorDto"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IAppErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Send forgot password OTP",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/forgot-password/reset-password/{id}": {
+      "patch": {
+        "operationId": "AuthController_resetPassword",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IAppErrorDto"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IAppErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Reset password after OTP verification",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/users/me": {
+      "get": {
+        "operationId": "UsersController_findOneUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Retrieves a user by their  token",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "UsersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User retrieved successfully"
+          }
+        },
+        "summary": "Get user by ID",
+        "tags": [
+          "Users"
+        ]
+      },
+      "delete": {
+        "operationId": "UsersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully"
+          }
+        },
+        "summary": "Delete user",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/send-notif": {
+      "get": {
+        "operationId": "UsersController_sendNotif",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Retrieves a user by their  token",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/notification": {
+      "patch": {
+        "operationId": "UsersController_notificationToken",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Firebase notification token of the user",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/users/verify-identity": {
+      "post": {
+        "operationId": "UsersController_verifyIdentity",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Verify user identity (KYC)",
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/notifications/events/{ref}": {
+      "get": {
+        "operationId": "NotificationsController_sendEvents",
+        "parameters": [
+          {
+            "name": "ref",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Notifications"
+        ]
+      }
+    },
     "/organisations": {
       "post": {
         "operationId": "OrganisationsController_create",
@@ -229,7 +683,7 @@
             "description": "Regeneration successfully"
           }
         },
-        "summary": "Regenerate an api key",
+        "summary": "Regenerate an secret for api key",
         "tags": [
           "api-keys"
         ]
@@ -302,6 +756,30 @@
           }
         },
         "summary": "Delete a webhook",
+        "tags": [
+          "api-keys"
+        ]
+      }
+    },
+    "/api-keys/{api_key_id}": {
+      "delete": {
+        "operationId": "ApiKeyController_deleteApiKey",
+        "parameters": [
+          {
+            "name": "api_key_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook deleted successfully"
+          }
+        },
+        "summary": "Delete a Api Key",
         "tags": [
           "api-keys"
         ]
@@ -1144,6 +1622,21 @@
         ]
       }
     },
+    "/transferts/send-otp": {
+      "get": {
+        "operationId": "TransfertsController_forgotPassword",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Send transfert OTP successfully"
+          }
+        },
+        "summary": "Send transfert OTP",
+        "tags": [
+          "transferts"
+        ]
+      }
+    },
     "/transferts/initialise": {
       "post": {
         "operationId": "TransfertsController_newTransfert",
@@ -1224,505 +1717,6 @@
           "transferts"
         ]
       }
-    },
-    "/auth/login": {
-      "post": {
-        "operationId": "AuthController_login",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequestDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponseDto"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IAppErrorDto"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IAppErrorDto"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Auth"
-        ]
-      }
-    },
-    "/auth/logout": {
-      "post": {
-        "operationId": "AuthController_logout",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          },
-          "5XX": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IAppErrorDto"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IAppErrorDto"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Auth"
-        ]
-      }
-    },
-    "/auth/register": {
-      "post": {
-        "operationId": "AuthController_register",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateUserDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponseDto"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IAppErrorDto"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IAppErrorDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Register a new user",
-        "tags": [
-          "Auth"
-        ]
-      }
-    },
-    "/auth/{id}/update": {
-      "post": {
-        "operationId": "AuthController_completeUserProfile",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CompleteUserDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponseDto"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IAppErrorDto"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IAppErrorDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Update a user",
-        "tags": [
-          "Auth"
-        ]
-      }
-    },
-    "/auth/forgot-password/send-otp": {
-      "post": {
-        "operationId": "AuthController_forgotPassword",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserAuthenticationOtpDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponseDto"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IAppErrorDto"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IAppErrorDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Send forgot password OTP",
-        "tags": [
-          "Auth"
-        ]
-      }
-    },
-    "/auth/forgot-password/verify-otp": {
-      "post": {
-        "operationId": "AuthController_verifyPassword",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserVerifyOtpDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": ""
-          },
-          "5XX": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IAppErrorDto"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IAppErrorDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "verify password OTP",
-        "tags": [
-          "Auth"
-        ]
-      }
-    },
-    "/auth/forgot-password/reset-password/{id}": {
-      "patch": {
-        "operationId": "AuthController_resetPassword",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPasswordDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponseDto"
-                }
-              }
-            }
-          },
-          "5XX": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IAppErrorDto"
-                }
-              }
-            }
-          },
-          "4XX": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IAppErrorDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Reset password after OTP verification",
-        "tags": [
-          "Auth"
-        ]
-      }
-    },
-    "/users/me": {
-      "get": {
-        "operationId": "UsersController_findOneUser",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Retrieves a user by their  token",
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/users/{id}": {
-      "get": {
-        "operationId": "UsersController_findOne",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User retrieved successfully"
-          }
-        },
-        "summary": "Get user by ID",
-        "tags": [
-          "Users"
-        ]
-      },
-      "delete": {
-        "operationId": "UsersController_remove",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User deleted successfully"
-          }
-        },
-        "summary": "Delete user",
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/users/send-notif": {
-      "get": {
-        "operationId": "UsersController_sendNotif",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Retrieves a user by their  token",
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/users/notification": {
-      "patch": {
-        "operationId": "UsersController_notificationToken",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "summary": "Firebase notification token of the user",
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/users/verify-identity": {
-      "post": {
-        "operationId": "UsersController_verifyIdentity",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponseDto"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Verify user identity (KYC)",
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/notifications/events/{ref}": {
-      "get": {
-        "operationId": "NotificationsController_sendEvents",
-        "parameters": [
-          {
-            "name": "ref",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Notifications"
-        ]
-      }
     }
   },
   "info": {
@@ -1751,6 +1745,226 @@
   ],
   "components": {
     "schemas": {
+      "IDisplayText": {
+        "type": "object",
+        "properties": {
+          "lang": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "lang",
+          "value"
+        ]
+      },
+      "IAppError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "display_messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IDisplayText"
+            }
+          },
+          "details": {
+            "type": "object"
+          },
+          "status_code": {
+            "type": "number"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "IAppErrorDto": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/IAppError"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "LoginRequestDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "UserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "fullname": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "country_code": {
+            "type": "string"
+          },
+          "code_phone": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "INIT",
+              "COMPLETE",
+              "PENDING"
+            ]
+          },
+          "firebaseNotificationToken": {
+            "type": "string",
+            "description": "Firebase notification token of the user"
+          },
+          "balance": {
+            "type": "number"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "CLIENT",
+              "MERCHANT",
+              "ADMIN"
+            ]
+          },
+          "kyc_status": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "surname": {
+            "type": "string"
+          },
+          "birth_day": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "fullname",
+          "phone",
+          "email",
+          "country_code",
+          "code_phone",
+          "status",
+          "firebaseNotificationToken",
+          "balance",
+          "role",
+          "kyc_status",
+          "name",
+          "surname",
+          "birth_day"
+        ]
+      },
+      "LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/UserDto"
+          },
+          "auth_token": {
+            "type": "string"
+          },
+          "expire_at": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "user",
+          "auth_token",
+          "expire_at"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "fullname": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fullname",
+          "email",
+          "password"
+        ]
+      },
+      "CompleteUserDto": {
+        "type": "object",
+        "properties": {
+          "phone": {
+            "type": "string"
+          },
+          "code_phone": {
+            "type": "string",
+            "description": "User code_phone"
+          }
+        },
+        "required": [
+          "phone",
+          "code_phone"
+        ]
+      },
+      "UserAuthenticationOtpDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "email"
+          }
+        }
+      },
+      "NewPasswordDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "Password"
+          },
+          "otp_code": {
+            "type": "string"
+          }
+        }
+      },
       "CreateOrganisationDto": {
         "type": "object",
         "properties": {
@@ -2125,6 +2339,9 @@
           "phone": {
             "type": "string"
           },
+          "otp_code": {
+            "type": "string"
+          },
           "service_mobile_code": {
             "type": "string"
           }
@@ -2133,239 +2350,9 @@
           "amount",
           "name",
           "phone",
+          "otp_code",
           "service_mobile_code"
         ]
-      },
-      "IDisplayText": {
-        "type": "object",
-        "properties": {
-          "lang": {
-            "type": "string"
-          },
-          "value": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "lang",
-          "value"
-        ]
-      },
-      "IAppError": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          },
-          "display_messages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/IDisplayText"
-            }
-          },
-          "details": {
-            "type": "object"
-          },
-          "status_code": {
-            "type": "number"
-          },
-          "url": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "code",
-          "message"
-        ]
-      },
-      "IAppErrorDto": {
-        "type": "object",
-        "properties": {
-          "error": {
-            "$ref": "#/components/schemas/IAppError"
-          }
-        },
-        "required": [
-          "error"
-        ]
-      },
-      "LoginRequestDto": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "email",
-          "password"
-        ]
-      },
-      "UserDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "fullname": {
-            "type": "string"
-          },
-          "phone": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "country_code": {
-            "type": "string"
-          },
-          "code_phone": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "INIT",
-              "COMPLETE",
-              "PENDING"
-            ]
-          },
-          "firebaseNotificationToken": {
-            "type": "string",
-            "description": "Firebase notification token of the user"
-          },
-          "balance": {
-            "type": "number"
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "CLIENT",
-              "MERCHANT",
-              "ADMIN"
-            ]
-          },
-          "kyc_status": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "surname": {
-            "type": "string"
-          },
-          "birth_day": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "id",
-          "fullname",
-          "phone",
-          "email",
-          "country_code",
-          "code_phone",
-          "status",
-          "firebaseNotificationToken",
-          "balance",
-          "role",
-          "kyc_status",
-          "name",
-          "surname",
-          "birth_day"
-        ]
-      },
-      "LoginResponseDto": {
-        "type": "object",
-        "properties": {
-          "user": {
-            "$ref": "#/components/schemas/UserDto"
-          },
-          "auth_token": {
-            "type": "string"
-          },
-          "expire_at": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "user",
-          "auth_token",
-          "expire_at"
-        ]
-      },
-      "CreateUserDto": {
-        "type": "object",
-        "properties": {
-          "fullname": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "fullname",
-          "email",
-          "password"
-        ]
-      },
-      "CompleteUserDto": {
-        "type": "object",
-        "properties": {
-          "phone": {
-            "type": "string"
-          },
-          "code_phone": {
-            "type": "string",
-            "description": "User code_phone"
-          }
-        },
-        "required": [
-          "phone",
-          "code_phone"
-        ]
-      },
-      "UserAuthenticationOtpDto": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "description": "email"
-          }
-        }
-      },
-      "UserVerifyOtpDto": {
-        "type": "object",
-        "properties": {
-          "user_id": {
-            "type": "string"
-          },
-          "otp_code": {
-            "type": "string"
-          }
-        }
-      },
-      "NewPasswordDto": {
-        "type": "object",
-        "properties": {
-          "password": {
-            "type": "string",
-            "description": "Password"
-          },
-          "otp_code": {
-            "type": "string"
-          }
-        }
       }
     }
   }

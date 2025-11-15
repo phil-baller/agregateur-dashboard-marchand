@@ -27,6 +27,7 @@ import {
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Loader2, ArrowRight, ArrowLeft, Shield } from "lucide-react";
+import { useTransfersStore } from "@/stores/transfers.store";
 import type { CreateTransfertDto } from "@/types/api";
 import type { ServiceMobileResponseDto } from "@/types/api";
 
@@ -54,9 +55,11 @@ export const CreateTransferDialog = ({
   onCreateTransfer,
   isLoading = false,
 }: CreateTransferDialogProps) => {
+  const { sendTransferOtp, isLoading: isSendingOtp } = useTransfersStore();
   const [currentStep, setCurrentStep] = React.useState<WizardStep>("form");
   const [otp, setOtp] = React.useState("");
   const [isVerifying, setIsVerifying] = React.useState(false);
+  const [isSendingOtpLocal, setIsSendingOtpLocal] = React.useState(false);
   const [transferData, setTransferData] = React.useState<TransferFormData | null>(null);
 
   const form = useForm<TransferFormData>({
@@ -77,18 +80,22 @@ export const CreateTransferDialog = ({
       });
       return;
     }
+    setIsSendingOtpLocal(true);
     try {
+      await sendTransferOtp();
       setTransferData(data);
       setCurrentStep("otp");
       toast.success("OTP sent to your registered email");
     } catch (error) {
-      toast.error("Failed to initialize transfer");
+      toast.error("Failed to send OTP. Please try again.");
+    } finally {
+      setIsSendingOtpLocal(false);
     }
   };
 
   const handleOtpSubmit = async () => {
-    if (otp.length !== 6) {
-      toast.error("Please enter a valid 6-digit OTP code");
+    if (otp.length !== 4) {
+      toast.error("Please enter a valid 4-digit OTP code");
       return;
     }
 
@@ -104,6 +111,7 @@ export const CreateTransferDialog = ({
         name: transferData.name,
         phone: transferData.phone,
         service_mobile_code: transferData.service_mobile_code,
+        otp_code: otp,
       });
       toast.success("Transfer created successfully");
       handleClose();
@@ -246,11 +254,11 @@ export const CreateTransferDialog = ({
               <Button type="button" variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? (
+              <Button type="submit" disabled={isLoading || isSendingOtp || isSendingOtpLocal}>
+                {isLoading || isSendingOtp || isSendingOtpLocal ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
+                    Sending OTP...
                   </>
                 ) : (
                   <>
@@ -294,11 +302,11 @@ export const CreateTransferDialog = ({
             <div className="space-y-4">
               <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                 <Shield className="h-4 w-4" />
-                <span>Enter the 6-digit OTP code</span>
+                <span>Enter the 4-digit OTP code</span>
               </div>
               <div className="flex justify-center">
                 <InputOTP
-                  maxLength={6}
+                  maxLength={4}
                   value={otp}
                   onChange={(value) => setOtp(value)}
                   disabled={isVerifying || isLoading}
@@ -308,8 +316,6 @@ export const CreateTransferDialog = ({
                     <InputOTPSlot index={1} />
                     <InputOTPSlot index={2} />
                     <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
                   </InputOTPGroup>
                 </InputOTP>
               </div>
@@ -331,7 +337,7 @@ export const CreateTransferDialog = ({
               <Button
                 type="button"
                 onClick={handleOtpSubmit}
-                disabled={isVerifying || isLoading || otp.length !== 6}
+                disabled={isVerifying || isLoading || otp.length !== 4}
               >
                 {isVerifying || isLoading ? (
                   <>

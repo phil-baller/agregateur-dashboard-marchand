@@ -25,6 +25,7 @@ interface TransfersState {
   };
   fetchTransfers: (params?: { page?: number; size?: number }) => Promise<void>;
   fetchTransferById: (id: string) => Promise<void>;
+  sendTransferOtp: () => Promise<void>;
   initializeTransfer: (data: CreateTransfertDto) => Promise<void>;
   setSelectedTransfer: (transfer: Transfer | null) => void;
   clearError: () => void;
@@ -83,6 +84,19 @@ export const useTransfersStore = create<TransfersState>((set, get) => ({
       const errorMessage =
         error instanceof Error ? error.message : "Failed to fetch transfer";
       set({ isLoading: false, error: errorMessage });
+    }
+  },
+
+  sendTransferOtp: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      await transfersController.sendTransferOtp();
+      set({ isLoading: false });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to send OTP";
+      set({ isLoading: false, error: errorMessage });
+      throw error;
     }
   },
 
