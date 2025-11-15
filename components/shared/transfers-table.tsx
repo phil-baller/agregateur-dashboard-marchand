@@ -152,7 +152,7 @@ export const TransfersTable = ({
   return (
     <DataTable
       table={table}
-      onRowClick={onView ? (row) => onView(row.original) : undefined}
+      onRowClick={onView ? (row) => onView(row.original as Transfer) : undefined}
     />
   );
 };
