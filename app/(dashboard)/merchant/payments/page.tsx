@@ -8,6 +8,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import { PaymentsTable } from "@/components/shared/payments-table";
 import { GroupedPaymentsTable } from "@/components/shared/grouped-payments-table";
 import { PaymentDetailsSheet } from "@/components/shared/payment-details-sheet";
+import { GroupedPaymentDetailsSheet } from "@/components/shared/grouped-payment-details-sheet";
 import { CreateGroupedPaymentDialog } from "@/components/shared/create-grouped-payment-dialog";
 import { GroupedPaymentSuccessDialog } from "@/components/shared/grouped-payment-success-dialog";
 import { Button } from "@/components/ui/button";
@@ -105,6 +106,23 @@ export default function PaymentsPage() {
     [key: string]: unknown;
   } | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [selectedGroupedPayment, setSelectedGroupedPayment] = useState<{
+    id: string;
+    reference?: string;
+    reason?: string;
+    launch_url?: string;
+    currency?: string;
+    when_created?: string;
+    createdAt?: string;
+    organisation?: {
+      id: string;
+      libelle?: string;
+      description?: string;
+      [key: string]: unknown;
+    };
+    [key: string]: unknown;
+  } | null>(null);
+  const [groupedPaymentSheetOpen, setGroupedPaymentSheetOpen] = useState(false);
 
   const directPaymentForm = useForm<DirectPaymentFormData>({
     defaultValues: {
@@ -625,6 +643,10 @@ export default function PaymentsPage() {
                 >
                   <GroupedPaymentsTable
                     data={safeGroupedPayments}
+                    onRowClick={(payment) => {
+                      setSelectedGroupedPayment(payment);
+                      setGroupedPaymentSheetOpen(true);
+                    }}
                     onDelete={handleDeleteGroupedClick}
                     isLoading={isGroupedPaymentsLoading}
                     pagination={groupedPagination}
@@ -643,6 +665,14 @@ export default function PaymentsPage() {
         open={sheetOpen}
         onOpenChange={setSheetOpen}
         onDelete={handleDeleteClick}
+      />
+
+      {/* Grouped Payment Details Sheet */}
+      <GroupedPaymentDetailsSheet
+        groupedPayment={selectedGroupedPayment}
+        open={groupedPaymentSheetOpen}
+        onOpenChange={setGroupedPaymentSheetOpen}
+        onDelete={handleDeleteGroupedClick}
       />
 
       {/* Create Grouped Payment Dialog */}

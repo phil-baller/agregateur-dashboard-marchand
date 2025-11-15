@@ -64,11 +64,12 @@ export const GroupedPaymentsTable = ({
   const handleRowClickInternal = React.useCallback((payment: GroupedPayment) => {
     if (onRowClick) {
       onRowClick(payment);
-    } else {
-      // Navigate to grouped payment details page
-      router.push(`/merchant/payments/grouped/${payment.id}`);
     }
-  }, [onRowClick, router]);
+  }, [onRowClick]);
+
+  const handleViewTransactions = React.useCallback((payment: GroupedPayment) => {
+    router.push(`/merchant/payments/grouped/${payment.id}`);
+  }, [router]);
 
   const columns = useMemo<ColumnDef<GroupedPayment>[]>(
     () => [
@@ -130,7 +131,7 @@ export const GroupedPaymentsTable = ({
               <DropdownMenuItem 
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleRowClickInternal(row.original);
+                  handleViewTransactions(row.original);
                 }}
               >
                 <Eye className="mr-2 h-4 w-4" />
@@ -153,7 +154,7 @@ export const GroupedPaymentsTable = ({
         ),
       },
     ],
-    [onView, onDelete, router]
+    [onView, onDelete, handleRowClickInternal, handleViewTransactions]
   );
 
   const pageCount = pagination
