@@ -34,7 +34,7 @@ interface SettingsState {
     organisationId: string,
     data: GenerateApiKeyOrganisationDto
   ) => Promise<unknown>;
-  generateSecretKey: (apiKeyId: string) => Promise<unknown>;
+  regenerateApiKeySecret: (apiKeyId: string) => Promise<unknown>;
   deleteApiKey: (apiKeyId: string) => Promise<void>;
   fetchWebhooks: (apiKeyId: string) => Promise<void>;
   createWebhook: (apiKeyId: string, data: CreateWebhookDto) => Promise<void>;
@@ -86,17 +86,17 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     }
   },
 
-  generateSecretKey: async (apiKeyId: string) => {
+  regenerateApiKeySecret: async (apiKeyId: string) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await apiKeysController.generateSecretKey(apiKeyId);
+      const response = await apiKeysController.regenerateApiKeySecret(apiKeyId);
       set({ isLoading: false });
       return response;
     } catch (error) {
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "Failed to generate secret key";
+          : "Failed to regenerate secret key";
       set({ isLoading: false, error: errorMessage });
       throw error;
     }

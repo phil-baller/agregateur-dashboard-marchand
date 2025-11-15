@@ -75,7 +75,7 @@ export default function SettingsPage() {
     isLoading: settingsLoading,
     fetchApiKeys,
     generateApiKey,
-    generateSecretKey,
+    regenerateApiKeySecret,
     deleteApiKey,
     createWebhook,
     fetchWebhooks,
@@ -283,7 +283,7 @@ export default function SettingsPage() {
     setIsGenerateSecretConfirmOpen(false);
 
     try {
-      const response = await generateSecretKey(apiKeyForSecretGeneration);
+      const response = await regenerateApiKeySecret(apiKeyForSecretGeneration);
 
       // Extract secret from response
       let secretValue: string | null = null;

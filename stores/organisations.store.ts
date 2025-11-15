@@ -68,7 +68,7 @@ interface OrganisationsState {
     data: UpdateWebhookDto
   ) => Promise<void>;
   deleteWebhook: (apiKeyId: string, webhookId: string) => Promise<void>;
-  generateSecretKey: (apiKeyId: string) => Promise<unknown>;
+  regenerateApiKeySecret: (apiKeyId: string) => Promise<unknown>;
   deleteApiKey: (apiKeyId: string) => Promise<void>;
   setCurrentOrganisationId: (id: string | null) => void;
   getCurrentOrganisation: () => Organisation | null;
@@ -304,17 +304,17 @@ export const useOrganisationsStore = create<OrganisationsState>()(
       }
     },
 
-    generateSecretKey: async (apiKeyId) => {
+    regenerateApiKeySecret: async (apiKeyId) => {
       set({ isLoading: true, error: null });
       try {
-        const response = await apiKeysController.generateSecretKey(apiKeyId);
+        const response = await apiKeysController.regenerateApiKeySecret(apiKeyId);
         set({ isLoading: false });
         return response;
       } catch (error) {
         const errorMessage =
           error instanceof Error
             ? error.message
-            : "Failed to generate secret key";
+            : "Failed to regenerate secret key";
         set({ isLoading: false, error: errorMessage });
         throw error;
       }

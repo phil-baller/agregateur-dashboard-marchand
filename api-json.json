@@ -1,6 +1,495 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/organisations": {
+      "post": {
+        "operationId": "OrganisationsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganisationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Organisation created successfully"
+          }
+        },
+        "summary": "Create a new organisation",
+        "tags": [
+          "organisations"
+        ]
+      }
+    },
+    "/organisations/me": {
+      "get": {
+        "operationId": "OrganisationsController_findByUser",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Organisation retrieved successfully"
+          }
+        },
+        "summary": "Get organisation by ID",
+        "tags": [
+          "organisations"
+        ]
+      }
+    },
+    "/organisations/{id}": {
+      "patch": {
+        "operationId": "OrganisationsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrganisationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Organisation updated successfully"
+          }
+        },
+        "summary": "Update organisation",
+        "tags": [
+          "organisations"
+        ]
+      },
+      "delete": {
+        "operationId": "OrganisationsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organisation deleted successfully"
+          }
+        },
+        "summary": "Delete organisation",
+        "tags": [
+          "organisations"
+        ]
+      }
+    },
+    "/api-keys/{organisation}/generate": {
+      "post": {
+        "operationId": "ApiKeyController_generateApiKey",
+        "parameters": [
+          {
+            "name": "organisation",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateApiKeyOrganisationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Organisation retrieved successfully"
+          }
+        },
+        "summary": "Create organisation api key",
+        "tags": [
+          "api-keys"
+        ]
+      }
+    },
+    "/api-keys/{organisation}/api-key": {
+      "get": {
+        "operationId": "ApiKeyController_listApiKeys",
+        "parameters": [
+          {
+            "name": "organisation",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organisation retrieved successfully"
+          }
+        },
+        "summary": "Get organisation api key",
+        "tags": [
+          "api-keys"
+        ]
+      }
+    },
+    "/api-keys/{api_key_id}/webhooks": {
+      "post": {
+        "operationId": "ApiKeyController_createWebhook",
+        "parameters": [
+          {
+            "name": "api_key_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWebhookDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Webhook created successfully"
+          }
+        },
+        "summary": "Create a webhook for an api key",
+        "tags": [
+          "api-keys"
+        ]
+      },
+      "get": {
+        "operationId": "ApiKeyController_getWebhooks",
+        "parameters": [
+          {
+            "name": "api_key_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhooks retrieved successfully"
+          }
+        },
+        "summary": "Get all webhooks for an api key",
+        "tags": [
+          "api-keys"
+        ]
+      }
+    },
+    "/api-keys/{api_key_id}/regenerate": {
+      "get": {
+        "operationId": "ApiKeyController_regenerateApiKeySecret",
+        "parameters": [
+          {
+            "name": "api_key_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Regeneration successfully"
+          }
+        },
+        "summary": "Regenerate an api key",
+        "tags": [
+          "api-keys"
+        ]
+      }
+    },
+    "/api-keys/{api_key_id}/webhooks/{web_hook_id}": {
+      "patch": {
+        "operationId": "ApiKeyController_updateWebhook",
+        "parameters": [
+          {
+            "name": "api_key_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "web_hook_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateWebhookDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook updated successfully"
+          }
+        },
+        "summary": "Update a webhook",
+        "tags": [
+          "api-keys"
+        ]
+      },
+      "delete": {
+        "operationId": "ApiKeyController_deleteWebhook",
+        "parameters": [
+          {
+            "name": "api_key_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "web_hook_id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook deleted successfully"
+          }
+        },
+        "summary": "Delete a webhook",
+        "tags": [
+          "api-keys"
+        ]
+      }
+    },
+    "/beneficiaires": {
+      "post": {
+        "operationId": "BeneficiairesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBeneficiaireDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Beneficiaire created successfully"
+          }
+        },
+        "summary": "Create a new beneficiaire",
+        "tags": [
+          "beneficiaires"
+        ]
+      },
+      "get": {
+        "operationId": "BeneficiairesController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Beneficiaires retrieved successfully"
+          }
+        },
+        "summary": "Get all beneficiaires",
+        "tags": [
+          "beneficiaires"
+        ]
+      }
+    },
+    "/beneficiaires/me": {
+      "get": {
+        "operationId": "BeneficiairesController_findByUser",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Beneficiaires retrieved successfully"
+          }
+        },
+        "summary": "Get beneficiaire by user",
+        "tags": [
+          "beneficiaires"
+        ]
+      }
+    },
+    "/beneficiaires/{organisation}": {
+      "get": {
+        "operationId": "BeneficiairesController_findByOrganisation",
+        "parameters": [
+          {
+            "name": "organisation",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Beneficiaires retrieved successfully"
+          }
+        },
+        "summary": "Get beneficiaires by organisation",
+        "tags": [
+          "beneficiaires"
+        ]
+      }
+    },
+    "/beneficiaires/{id}": {
+      "patch": {
+        "operationId": "BeneficiairesController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBeneficiaireDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Beneficiaire updated successfully"
+          }
+        },
+        "summary": "Update beneficiaire",
+        "tags": [
+          "beneficiaires"
+        ]
+      },
+      "delete": {
+        "operationId": "BeneficiairesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Beneficiaire deleted successfully"
+          }
+        },
+        "summary": "Delete beneficiaire",
+        "tags": [
+          "beneficiaires"
+        ]
+      }
+    },
     "/payments/new-payment": {
       "post": {
         "operationId": "PaymentsController_newPayment",
@@ -440,471 +929,6 @@
         "summary": "Delete transaction",
         "tags": [
           "grouped-payments"
-        ]
-      }
-    },
-    "/organisations": {
-      "post": {
-        "operationId": "OrganisationsController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateOrganisationDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Organisation created successfully"
-          }
-        },
-        "summary": "Create a new organisation",
-        "tags": [
-          "organisations"
-        ]
-      }
-    },
-    "/organisations/me": {
-      "get": {
-        "operationId": "OrganisationsController_findByUser",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Organisation retrieved successfully"
-          }
-        },
-        "summary": "Get organisation by ID",
-        "tags": [
-          "organisations"
-        ]
-      }
-    },
-    "/organisations/{id}": {
-      "patch": {
-        "operationId": "OrganisationsController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateOrganisationDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Organisation updated successfully"
-          }
-        },
-        "summary": "Update organisation",
-        "tags": [
-          "organisations"
-        ]
-      },
-      "delete": {
-        "operationId": "OrganisationsController_remove",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Organisation deleted successfully"
-          }
-        },
-        "summary": "Delete organisation",
-        "tags": [
-          "organisations"
-        ]
-      }
-    },
-    "/api-keys/{organisation}/generate": {
-      "post": {
-        "operationId": "ApiKeyController_generateApiKey",
-        "parameters": [
-          {
-            "name": "organisation",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GenerateApiKeyOrganisationDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Organisation retrieved successfully"
-          }
-        },
-        "summary": "Create organisation api key",
-        "tags": [
-          "api-keys"
-        ]
-      }
-    },
-    "/api-keys/{organisation}/api-key": {
-      "get": {
-        "operationId": "ApiKeyController_listApiKeys",
-        "parameters": [
-          {
-            "name": "organisation",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Organisation retrieved successfully"
-          }
-        },
-        "summary": "Get organisation api key",
-        "tags": [
-          "api-keys"
-        ]
-      }
-    },
-    "/api-keys/{api_key_id}/webhooks": {
-      "post": {
-        "operationId": "ApiKeyController_createWebhook",
-        "parameters": [
-          {
-            "name": "api_key_id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateWebhookDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Webhook created successfully"
-          }
-        },
-        "summary": "Create a webhook for an api key",
-        "tags": [
-          "api-keys"
-        ]
-      },
-      "get": {
-        "operationId": "ApiKeyController_getWebhooks",
-        "parameters": [
-          {
-            "name": "api_key_id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Webhooks retrieved successfully"
-          }
-        },
-        "summary": "Get all webhooks for an api key",
-        "tags": [
-          "api-keys"
-        ]
-      }
-    },
-    "/api-keys/{api_key_id}/webhooks/{web_hook_id}": {
-      "patch": {
-        "operationId": "ApiKeyController_updateWebhook",
-        "parameters": [
-          {
-            "name": "api_key_id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "web_hook_id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateWebhookDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Webhook updated successfully"
-          }
-        },
-        "summary": "Update a webhook",
-        "tags": [
-          "api-keys"
-        ]
-      },
-      "delete": {
-        "operationId": "ApiKeyController_deleteWebhook",
-        "parameters": [
-          {
-            "name": "api_key_id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "web_hook_id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Webhook deleted successfully"
-          }
-        },
-        "summary": "Delete a webhook",
-        "tags": [
-          "api-keys"
-        ]
-      }
-    },
-    "/beneficiaires": {
-      "post": {
-        "operationId": "BeneficiairesController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateBeneficiaireDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Beneficiaire created successfully"
-          }
-        },
-        "summary": "Create a new beneficiaire",
-        "tags": [
-          "beneficiaires"
-        ]
-      },
-      "get": {
-        "operationId": "BeneficiairesController_findAll",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "size",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Beneficiaires retrieved successfully"
-          }
-        },
-        "summary": "Get all beneficiaires",
-        "tags": [
-          "beneficiaires"
-        ]
-      }
-    },
-    "/beneficiaires/me": {
-      "get": {
-        "operationId": "BeneficiairesController_findByUser",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "size",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Beneficiaires retrieved successfully"
-          }
-        },
-        "summary": "Get beneficiaire by user",
-        "tags": [
-          "beneficiaires"
-        ]
-      }
-    },
-    "/beneficiaires/{organisation}": {
-      "get": {
-        "operationId": "BeneficiairesController_findByOrganisation",
-        "parameters": [
-          {
-            "name": "organisation",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "size",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Beneficiaires retrieved successfully"
-          }
-        },
-        "summary": "Get beneficiaires by organisation",
-        "tags": [
-          "beneficiaires"
-        ]
-      }
-    },
-    "/beneficiaires/{id}": {
-      "patch": {
-        "operationId": "BeneficiairesController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateBeneficiaireDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Beneficiaire updated successfully"
-          }
-        },
-        "summary": "Update beneficiaire",
-        "tags": [
-          "beneficiaires"
-        ]
-      },
-      "delete": {
-        "operationId": "BeneficiairesController_remove",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Beneficiaire deleted successfully"
-          }
-        },
-        "summary": "Delete beneficiaire",
-        "tags": [
-          "beneficiaires"
         ]
       }
     },
@@ -1727,6 +1751,102 @@
   ],
   "components": {
     "schemas": {
+      "CreateOrganisationDto": {
+        "type": "object",
+        "properties": {
+          "libelle": {
+            "type": "string"
+          },
+          "web_site": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "libelle",
+          "web_site"
+        ]
+      },
+      "UpdateOrganisationDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "GenerateApiKeyOrganisationDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateWebhookDto": {
+        "type": "object",
+        "properties": {
+          "link": {
+            "type": "string",
+            "description": "The URL of the webhook endpoint"
+          },
+          "title": {
+            "type": "string",
+            "description": "Optional title for the webhook"
+          }
+        },
+        "required": [
+          "link"
+        ]
+      },
+      "UpdateWebhookDto": {
+        "type": "object",
+        "properties": {
+          "link": {
+            "type": "string",
+            "description": "The URL of the webhook endpoint"
+          },
+          "title": {
+            "type": "string",
+            "description": "Optional title for the webhook"
+          }
+        }
+      },
+      "CreateBeneficiaireDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "country_id": {
+            "type": "string"
+          },
+          "code_phone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "phone",
+          "country_id"
+        ]
+      },
+      "UpdateBeneficiaireDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
       "NewCreatePaymentDto": {
         "type": "object",
         "properties": {
@@ -1870,102 +1990,6 @@
           "launch_url",
           "reference"
         ]
-      },
-      "CreateOrganisationDto": {
-        "type": "object",
-        "properties": {
-          "libelle": {
-            "type": "string"
-          },
-          "web_site": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "libelle",
-          "web_site"
-        ]
-      },
-      "UpdateOrganisationDto": {
-        "type": "object",
-        "properties": {
-          "description": {
-            "type": "string"
-          }
-        }
-      },
-      "GenerateApiKeyOrganisationDto": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          }
-        }
-      },
-      "CreateWebhookDto": {
-        "type": "object",
-        "properties": {
-          "link": {
-            "type": "string",
-            "description": "The URL of the webhook endpoint"
-          },
-          "title": {
-            "type": "string",
-            "description": "Optional title for the webhook"
-          }
-        },
-        "required": [
-          "link"
-        ]
-      },
-      "UpdateWebhookDto": {
-        "type": "object",
-        "properties": {
-          "link": {
-            "type": "string",
-            "description": "The URL of the webhook endpoint"
-          },
-          "title": {
-            "type": "string",
-            "description": "Optional title for the webhook"
-          }
-        }
-      },
-      "CreateBeneficiaireDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "phone": {
-            "type": "string"
-          },
-          "country_id": {
-            "type": "string"
-          },
-          "code_phone": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "phone",
-          "country_id"
-        ]
-      },
-      "UpdateBeneficiaireDto": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          }
-        }
       },
       "CountryResponseDto": {
         "type": "object",
