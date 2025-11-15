@@ -2,9 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { IconCirclePlusFilled, IconMail, type Icon } from "@tabler/icons-react"
+import { type Icon } from "@tabler/icons-react"
 
-import { Button } from "@/components/ui/button"
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -12,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { cn } from "@/lib/utils"
 
 export function NavMain({
   items,
@@ -24,34 +24,52 @@ export function NavMain({
 }) {
   const pathname = usePathname()
 
+  const getIsActive = (url: string, currentIndex: number) => {
+    // Exact match
+    if (pathname === url) {
+      return true
+    }
+    
+    // Check if pathname is a child of this URL
+    if (pathname?.startsWith(url + "/")) {
+      // Check if there's a more specific route in the items array that also matches
+      // If so, don't highlight this parent route
+      const hasMoreSpecificMatch = items.some((otherItem, otherIndex) => {
+        if (otherIndex === currentIndex) return false
+        // Check if otherItem.url is more specific (longer) and also matches
+        if (
+          otherItem.url.startsWith(url + "/") &&
+          pathname?.startsWith(otherItem.url)
+        ) {
+          return true
+        }
+        return false
+      })
+      
+      // Only highlight if there's no more specific match
+      return !hasMoreSpecificMatch
+    }
+    
+    return false
+  }
+
   return (
     <SidebarGroup>
-      <SidebarGroupContent className="flex flex-col gap-2">
+      <SidebarGroupContent>
         <SidebarMenu>
-          <SidebarMenuItem className="flex items-center gap-2">
-            <SidebarMenuButton
-              tooltip="Quick Create"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
-            >
-              <IconCirclePlusFilled />
-              <span>Quick Create</span>
-            </SidebarMenuButton>
-            <Button
-              size="icon"
-              className="size-8 group-data-[collapsible=icon]:opacity-0"
-              variant="outline"
-            >
-              <IconMail />
-              <span className="sr-only">Inbox</span>
-            </Button>
-          </SidebarMenuItem>
-        </SidebarMenu>
-        <SidebarMenu>
-          {items.map((item) => {
-            const isActive = pathname === item.url || pathname?.startsWith(item.url + "/")
+          {items.map((item, index) => {
+            const isActive = getIsActive(item.url, index)
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton tooltip={item.title} asChild isActive={isActive}>
+                <SidebarMenuButton
+                  tooltip={item.title}
+                  asChild
+                  isActive={isActive}
+                  className={cn(
+                    isActive &&
+                      "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground duration-200 ease-linear"
+                  )}
+                >
                   <Link href={item.url}>
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
