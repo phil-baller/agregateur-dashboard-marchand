@@ -232,6 +232,3 @@ export const apiDelete = <T>(endpoint: string): Promise<T> => {
   return apiRequest<T>(endpoint, { method: "DELETE" });
 };
 
-// Export apiRequest for advanced use cases (e.g., blob responses, custom headers)
-export { apiRequest };
-
