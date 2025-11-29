@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useOrganisationsStore } from "@/stores/organisations.store";
 import { resetOrganizationStores } from "@/stores";
 import { Button } from "@/components/ui/button";
@@ -64,12 +64,7 @@ export const OrganizationSwitcher = ({
   const [webSite, setWebSite] = useState("");
   const [description, setDescription] = useState("");
 
-  // Fetch organizations on mount
-  useEffect(() => {
-    if (organisations.length === 0) {
-      fetchMyOrganisations();
-    }
-  }, [organisations.length, fetchMyOrganisations]);
+  // No need to fetch here - the store will use persisted data or the layout will fetch if needed
 
   const currentOrg = getCurrentOrganisation();
 
@@ -128,8 +123,8 @@ export const OrganizationSwitcher = ({
       // Simulate a small delay for better UX
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Set the new organization ID
-      setCurrentOrganisationId(switchingOrgId);
+      // Set the new organization ID (this will trigger a refetch)
+      await setCurrentOrganisationId(switchingOrgId);
       
       toast.success("Organization switched successfully");
       setIsSwitchDialogOpen(false);

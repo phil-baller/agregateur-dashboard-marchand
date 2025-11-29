@@ -47,7 +47,7 @@ interface OrganisationsState {
   webhooks: Webhook[];
   isLoading: boolean;
   error: string | null;
-  fetchMyOrganisations: () => Promise<void>;
+  fetchMyOrganisations: (force?: boolean) => Promise<void>;
   fetchMyOrganisation: () => Promise<void>; // Keep for backward compatibility
   createOrganisation: (data: CreateOrganisationDto) => Promise<void>;
   updateOrganisation: (id: string, data: UpdateOrganisationDto) => Promise<void>;
@@ -70,7 +70,7 @@ interface OrganisationsState {
   deleteWebhook: (apiKeyId: string, webhookId: string) => Promise<void>;
   regenerateApiKeySecret: (apiKeyId: string) => Promise<unknown>;
   deleteApiKey: (apiKeyId: string) => Promise<void>;
-  setCurrentOrganisationId: (id: string | null) => void;
+  setCurrentOrganisationId: (id: string | null) => Promise<void>;
   getCurrentOrganisation: () => Organisation | null;
   hasOrganisation: () => boolean;
   clearError: () => void;
@@ -87,7 +87,14 @@ export const useOrganisationsStore = create<OrganisationsState>()(
       isLoading: false,
       error: null,
 
-      fetchMyOrganisations: async () => {
+      fetchMyOrganisations: async (force = false) => {
+        const state = get();
+        
+        // If we already have organisations in persisted storage and not forcing, don't fetch
+        if (!force && state.organisations.length > 0) {
+          return;
+        }
+        
         set({ isLoading: true, error: null });
         try {
           const response = await organisationsController.getMyOrganisation();
@@ -114,7 +121,7 @@ export const useOrganisationsStore = create<OrganisationsState>()(
           }
           
           // Get current organisation ID from state or localStorage
-          const currentId = get().currentOrganisationId || 
+          const currentId = state.currentOrganisationId || 
             (typeof window !== "undefined" ? localStorage.getItem("current_organisation_id") : null);
           
           // Find current organisation from the list, or use first one if no current ID
@@ -154,7 +161,8 @@ export const useOrganisationsStore = create<OrganisationsState>()(
         set({ isLoading: true, error: null });
         try {
           await organisationsController.createOrganisation(data);
-          await get().fetchMyOrganisations();
+          // Force refetch after creating a new organisation
+          await get().fetchMyOrganisations(true);
           set({ isLoading: false });
         } catch (error) {
           const errorMessage =
@@ -170,7 +178,8 @@ export const useOrganisationsStore = create<OrganisationsState>()(
       set({ isLoading: true, error: null });
       try {
         await organisationsController.updateOrganisation(id, data);
-        await get().fetchMyOrganisations();
+        // Force refetch after updating organisation
+        await get().fetchMyOrganisations(true);
         set({ isLoading: false });
       } catch (error) {
         const errorMessage =
@@ -335,13 +344,27 @@ export const useOrganisationsStore = create<OrganisationsState>()(
       }
     },
 
-    setCurrentOrganisationId: (id: string | null) => {
+    setCurrentOrganisationId: async (id: string | null) => {
       const state = get();
       const selectedOrg = id ? state.organisations.find(org => org.id === id) : null;
-      set({ 
-        currentOrganisationId: id,
-        organisation: selectedOrg || null
-      });
+      
+      // If switching to a different organisation, force refetch to ensure we have latest data
+      if (id && id !== state.currentOrganisationId) {
+        await get().fetchMyOrganisations(true);
+        // After refetch, update the current organisation from the fresh data
+        const updatedState = get();
+        const updatedOrg = updatedState.organisations.find(org => org.id === id) || null;
+        set({ 
+          currentOrganisationId: id,
+          organisation: updatedOrg
+        });
+      } else {
+        set({ 
+          currentOrganisationId: id,
+          organisation: selectedOrg || null
+        });
+      }
+      
       if (typeof window !== "undefined") {
         if (id) {
           localStorage.setItem("current_organisation_id", id);
@@ -380,10 +403,13 @@ export const useOrganisationsStore = create<OrganisationsState>()(
       }),
       onRehydrateStorage: () => (state) => {
         // Restore current organisation ID from localStorage on rehydration
+        // During rehydration, we don't want to trigger a refetch, just restore the state
         if (state && typeof window !== "undefined") {
           const storedId = localStorage.getItem("current_organisation_id");
           if (storedId && !state.currentOrganisationId) {
-            state.setCurrentOrganisationId(storedId);
+            const selectedOrg = state.organisations.find(org => org.id === storedId) || null;
+            state.currentOrganisationId = storedId;
+            state.organisation = selectedOrg;
           }
         }
       },

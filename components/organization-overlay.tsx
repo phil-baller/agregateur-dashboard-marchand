@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useOrganisationsStore } from "@/stores/organisations.store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,23 +25,13 @@ export const OrganizationOverlay = () => {
     isLoading,
     error,
     clearError,
-    fetchMyOrganisations,
   } = useOrganisationsStore();
   const [libelle, setLibelle] = useState("");
   const [webSite, setWebSite] = useState("");
   const [description, setDescription] = useState("");
 
-  // Check if organization exists before showing overlay
-  useEffect(() => {
-    // If we have organizations, we shouldn't be showing this overlay
-    // But let's double-check by fetching if we're not sure
-    if (organisations.length === 0 && !isLoading) {
-      fetchMyOrganisations();
-    }
-  }, [organisations.length, isLoading, fetchMyOrganisations]);
-
   // Don't render if organization already exists
-  if (hasOrganisation() || organisation) {
+  if (hasOrganisation() || organisation || organisations.length > 0) {
     return null;
   }
 
@@ -60,18 +50,14 @@ export const OrganizationOverlay = () => {
     }
 
     try {
-      // Double-check organization doesn't exist before creating
-      if (hasOrganisation() || organisation) {
-        toast.error("Organization already exists");
-        return;
-      }
-
       await createOrganisation({
         libelle: libelle.trim(),
         web_site: webSite.trim(),
         description: description.trim() || undefined,
       });
       toast.success("Organization created successfully!");
+      // Form will be cleared and overlay will disappear automatically
+      // as the store updates and the layout re-renders
       setLibelle("");
       setWebSite("");
       setDescription("");
@@ -82,10 +68,16 @@ export const OrganizationOverlay = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
       <div className="container mx-auto max-w-2xl px-4">
-        <Dialog open={true}>
-          <DialogContent showCloseButton={false} className="sm:max-w-[600px]">
+        <Dialog open={true} modal={true}>
+          <DialogContent 
+            showCloseButton={false} 
+            className="sm:max-w-[600px]"
+            onEscapeKeyDown={(e) => e.preventDefault()}
+            onPointerDownOutside={(e) => e.preventDefault()}
+            onInteractOutside={(e) => e.preventDefault()}
+          >
             <DialogHeader>
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
                 <Building2 className="h-6 w-6 text-primary" />
