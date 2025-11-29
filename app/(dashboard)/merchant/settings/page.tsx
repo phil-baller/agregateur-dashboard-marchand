@@ -24,6 +24,9 @@ import {
   Edit,
   Plus,
   Loader2,
+  Download,
+  Shield,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { ApiKeyCard } from "@/components/settings/api-key-card";
@@ -40,7 +43,19 @@ import type {
   GenerateApiKeyOrganisationDto,
   CreateWebhookDto,
   UpdateWebhookDto,
+  VerifyIdentityDto,
 } from "@/types/api";
+import { paymentsController } from "@/controllers/payments.controller";
+import { usersController } from "@/controllers/users.controller";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useAuthStore } from "@/stores/auth.store";
 
 interface ApiKeyData {
   key: string;
@@ -100,6 +115,21 @@ export default function SettingsPage() {
   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null);
   const [copiedSecretId, setCopiedSecretId] = useState<string | null>(null);
   const [selectedApiKeyId, setSelectedApiKeyId] = useState<string | null>(null);
+  
+  // Monthly Reports states
+  const [reportTransactionType, setReportTransactionType] = useState<"PAYMENT" | "DIRECT_PAYMENT" | "TRANSFERT" | "RECHARGE">("PAYMENT");
+  const [reportStatus, setReportStatus] = useState<"INIT" | "INEXECUTION" | "PENDING" | "COMPLETE" | "FAILED" | "TIMEOUT">("COMPLETE");
+  const [reportMonth, setReportMonth] = useState<string>(new Date().toISOString().slice(0, 7));
+  const [isDownloadingReport, setIsDownloadingReport] = useState(false);
+  
+  // KYC Verification states
+  const [kycFullname, setKycFullname] = useState("");
+  const [kycUserPicture, setKycUserPicture] = useState<File | null>(null);
+  const [kycFirstFace, setKycFirstFace] = useState<File | null>(null);
+  const [kycSecondFace, setKycSecondFace] = useState<File | null>(null);
+  const [isSubmittingKyc, setIsSubmittingKyc] = useState(false);
+  
+  const { user, setUser } = useAuthStore();
 
   // Form states
   const [description, setDescription] = useState("");
@@ -419,6 +449,111 @@ export default function SettingsPage() {
     }
   };
 
+  const handleDownloadReport = async () => {
+    if (!organisation?.id) {
+      toast.error("No organization selected");
+      return;
+    }
+
+    setIsDownloadingReport(true);
+    try {
+      // Get start and end of the selected month
+      const [year, month] = reportMonth.split("-").map(Number);
+      const dateFrom = new Date(year, month - 1, 1).getTime();
+      const dateTo = new Date(year, month, 0, 23, 59, 59, 999).getTime();
+
+      const blob = await paymentsController.exportPayments({
+        transaction_type: reportTransactionType,
+        status: reportStatus,
+        dateFrom,
+        dateTo,
+        organisation_id: organisation.id,
+      });
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `report-${reportMonth}-${reportTransactionType}-${reportStatus}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Report downloaded successfully");
+    } catch (error) {
+      console.error("Failed to download report:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to download report. Please try again."
+      );
+    } finally {
+      setIsDownloadingReport(false);
+    }
+  };
+
+  const handleSubmitKyc = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!kycFullname.trim()) {
+      toast.error("Full name is required");
+      return;
+    }
+
+    setIsSubmittingKyc(true);
+    try {
+      if (!organisation?.id) {
+        toast.error("No organization selected");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("fullname", kycFullname.trim());
+      if (kycUserPicture) {
+        formData.append("user_picture", kycUserPicture);
+      }
+      if (kycFirstFace) {
+        formData.append("first_face", kycFirstFace);
+      }
+      if (kycSecondFace) {
+        formData.append("second_face", kycSecondFace);
+      }
+
+      const response = await usersController.verifyIdentity(formData, organisation.id);
+      
+      // Update user in auth store if response contains user data
+      if (response.user) {
+        setUser(response.user);
+      }
+
+      toast.success("KYC verification submitted successfully");
+      
+      // Reset form
+      setKycFullname("");
+      setKycUserPicture(null);
+      setKycFirstFace(null);
+      setKycSecondFace(null);
+      
+      // Reset file inputs
+      const userPictureInput = document.getElementById("kyc-user-picture") as HTMLInputElement;
+      const firstFaceInput = document.getElementById("kyc-first-face") as HTMLInputElement;
+      const secondFaceInput = document.getElementById("kyc-second-face") as HTMLInputElement;
+      if (userPictureInput) userPictureInput.value = "";
+      if (firstFaceInput) firstFaceInput.value = "";
+      if (secondFaceInput) secondFaceInput.value = "";
+    } catch (error) {
+      console.error("Failed to submit KYC verification:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to submit KYC verification. Please try again."
+      );
+    } finally {
+      setIsSubmittingKyc(false);
+    }
+  };
+
 
   if (!organisation) {
     return (
@@ -449,6 +584,14 @@ export default function SettingsPage() {
           <TabsTrigger value="api-keys">
             <Key className="mr-2 h-4 w-4" />
             API Keys
+          </TabsTrigger>
+          <TabsTrigger value="reports">
+            <FileText className="mr-2 h-4 w-4" />
+            Reports
+          </TabsTrigger>
+          <TabsTrigger value="kyc">
+            <Shield className="mr-2 h-4 w-4" />
+            KYC Verification
           </TabsTrigger>
         </TabsList>
 
@@ -561,6 +704,174 @@ export default function SettingsPage() {
                   ))}
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Reports Tab */}
+        <TabsContent value="reports" className="space-y-6">
+          <Card className="animate-slide-up">
+            <CardHeader>
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Monthly Reports
+                </CardTitle>
+                <CardDescription>
+                  Download monthly transaction reports
+                </CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="report-month">Month</Label>
+                  <Input
+                    id="report-month"
+                    type="month"
+                    value={reportMonth}
+                    onChange={(e) => setReportMonth(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="report-transaction-type">Transaction Type</Label>
+                  <Select
+                    value={reportTransactionType}
+                    onValueChange={(value) => setReportTransactionType(value as typeof reportTransactionType)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PAYMENT">Payment</SelectItem>
+                      <SelectItem value="DIRECT_PAYMENT">Direct Payment</SelectItem>
+                      <SelectItem value="TRANSFERT">Transfer</SelectItem>
+                      <SelectItem value="RECHARGE">Recharge</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="report-status">Status</Label>
+                  <Select
+                    value={reportStatus}
+                    onValueChange={(value) => setReportStatus(value as typeof reportStatus)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="INIT">Init</SelectItem>
+                      <SelectItem value="INEXECUTION">In Execution</SelectItem>
+                      <SelectItem value="PENDING">Pending</SelectItem>
+                      <SelectItem value="COMPLETE">Complete</SelectItem>
+                      <SelectItem value="FAILED">Failed</SelectItem>
+                      <SelectItem value="TIMEOUT">Timeout</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button
+                onClick={handleDownloadReport}
+                disabled={isDownloadingReport || !organisation?.id}
+                className="w-full md:w-auto"
+              >
+                {isDownloadingReport ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Downloading...
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Report
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* KYC Verification Tab */}
+        <TabsContent value="kyc" className="space-y-6">
+          <Card className="animate-slide-up">
+            <CardHeader>
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  KYC Verification
+                </CardTitle>
+                <CardDescription>
+                  Verify your identity by submitting required documents
+                </CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmitKyc} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="kyc-fullname">Full Name *</Label>
+                  <Input
+                    id="kyc-fullname"
+                    type="text"
+                    value={kycFullname}
+                    onChange={(e) => setKycFullname(e.target.value)}
+                    placeholder="Enter your full name"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="kyc-user-picture">User Picture</Label>
+                  <Input
+                    id="kyc-user-picture"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setKycUserPicture(e.target.files?.[0] || null)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Upload your profile picture
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="kyc-first-face">First Face Photo</Label>
+                  <Input
+                    id="kyc-first-face"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setKycFirstFace(e.target.files?.[0] || null)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Upload first face verification photo
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="kyc-second-face">Second Face Photo</Label>
+                  <Input
+                    id="kyc-second-face"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setKycSecondFace(e.target.files?.[0] || null)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Upload second face verification photo
+                  </p>
+                </div>
+                <Button
+                  type="submit"
+                  disabled={isSubmittingKyc || !kycFullname.trim()}
+                  className="w-full md:w-auto"
+                >
+                  {isSubmittingKyc ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="mr-2 h-4 w-4" />
+                      Submit Verification
+                    </>
+                  )}
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </TabsContent>

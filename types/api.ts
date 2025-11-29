@@ -52,6 +52,13 @@ export interface NewPasswordDto {
   otp_code: string;
 }
 
+export interface VerifyIdentityDto {
+  fullname: string;
+  user_picture?: File;
+  first_face?: File;
+  second_face?: File;
+}
+
 // Payment Types
 export interface PaymentResponseDto {
   id: string;
@@ -189,6 +196,7 @@ export interface CreateTransfertDto {
   phone: string;
   service_mobile_code: string;
   otp_code: string;
+  organisation_id?: string;
 }
 
 // Grouped Payment Types

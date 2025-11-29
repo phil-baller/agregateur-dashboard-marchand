@@ -838,68 +838,6 @@
         "tags": [
           "beneficiaires"
         ]
-      },
-      "get": {
-        "operationId": "BeneficiairesController_findAll",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "size",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Beneficiaires retrieved successfully"
-          }
-        },
-        "summary": "Get all beneficiaires",
-        "tags": [
-          "beneficiaires"
-        ]
-      }
-    },
-    "/beneficiaires/me": {
-      "get": {
-        "operationId": "BeneficiairesController_findByUser",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "size",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Beneficiaires retrieved successfully"
-          }
-        },
-        "summary": "Get beneficiaire by user",
-        "tags": [
-          "beneficiaires"
-        ]
       }
     },
     "/beneficiaires/{organisation}": {
@@ -1731,6 +1669,46 @@
         ]
       }
     },
+    "/transferts": {
+      "get": {
+        "operationId": "TransfertsController_findAll",
+        "parameters": [
+          {
+            "name": "organisation_id",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transferts retrieved successfully"
+          }
+        },
+        "summary": "Get all organisation transferts",
+        "tags": [
+          "transferts"
+        ]
+      }
+    },
     "/transferts/send-otp": {
       "get": {
         "operationId": "TransfertsController_forgotPassword",
@@ -1766,46 +1744,6 @@
           }
         },
         "summary": "Initialise a mobile transfert",
-        "tags": [
-          "transferts"
-        ]
-      }
-    },
-    "/transferts/{organisation}": {
-      "get": {
-        "operationId": "TransfertsController_findAll",
-        "parameters": [
-          {
-            "name": "organisation",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "size",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "transferts retrieved successfully"
-          }
-        },
-        "summary": "Get all organisation transferts",
         "tags": [
           "transferts"
         ]
@@ -1958,6 +1896,8 @@
             "type": "string",
             "enum": [
               "INIT",
+              "BLOCKED",
+              "REJECTED",
               "COMPLETE",
               "PENDING"
             ]

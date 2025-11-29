@@ -31,6 +31,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Loader2, ArrowRight, ArrowLeft, Shield } from "lucide-react";
 import { useTransfersStore } from "@/stores/transfers.store";
+import { useOrganisationsStore } from "@/stores/organisations.store";
 import type { CreateTransfertDto } from "@/types/api";
 import type { ServiceMobileResponseDto } from "@/types/api";
 
@@ -72,6 +73,7 @@ export const CreateTransferDialog = ({
   isLoading = false,
 }: CreateTransferDialogProps) => {
   const { sendTransferOtp, isLoading: isSendingOtp } = useTransfersStore();
+  const { organisation } = useOrganisationsStore();
   const [currentStep, setCurrentStep] = React.useState<WizardStep>("form");
   const [beneficiaryMode, setBeneficiaryMode] = React.useState<BeneficiaryMode>(
     beneficiaries.length > 0 ? "select" : "manual"
@@ -198,11 +200,18 @@ export const CreateTransferDialog = ({
         phone: transferData.phone,
         service_mobile_code: transferData.service_mobile_code,
         otp_code: otp,
+        organisation_id: organisation?.id,
       });
       toast.success("Transfer created successfully");
       handleClose();
     } catch (error) {
-      toast.error("Failed to create transfer. Please try again.");
+      // Error is already handled by API base layer (toast shown)
+      // Only show generic error if it's not an ApiError
+      if (error instanceof Error && error.name !== "ApiError") {
+        toast.error("Failed to create transfer. Please try again.");
+      }
+      // Re-throw to allow caller to handle if needed
+      throw error;
     } finally {
       setIsVerifying(false);
     }
