@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuthStore, type UserRole } from "@/stores/auth.store";
 import { useOrganisationsStore } from "@/stores/organisations.store";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -27,49 +27,50 @@ export default function DashboardLayout({
   } = useOrganisationsStore();
   const role = user?.role as UserRole | undefined;
 
-  // Fetch organizations for merchant users
+  // Fetch organizations for merchant users only if no persisted data exists
   useEffect(() => {
-    if (isAuthenticated && role === "MERCHANT") {
-      // Only fetch if we don't have organizations and we're not already loading
-      if (organisations.length === 0 && !orgLoading) {
-        fetchMyOrganisations();
-      }
+    // Only fetch if: user is authenticated merchant, no organisations in store (no persisted data), and not loading
+    if (isAuthenticated && role === "MERCHANT" && organisations.length === 0 && !orgLoading) {
+      // fetchMyOrganisations will check if data exists and skip if it does
+      fetchMyOrganisations();
     }
-  }, [isAuthenticated, role, organisations.length, orgLoading, fetchMyOrganisations]);
+  }, [isAuthenticated, role]);
 
   // Show loading state while fetching organization
-  if (role === "MERCHANT" && orgLoading && !organisation) {
+  if (role === "MERCHANT" && orgLoading && !organisation && organisations.length === 0) {
     return <PageLoader text="Loading dashboard..." />;
   }
 
   // Check if merchant user has organization
-  // Only show overlay if: user is merchant, not loading, and definitely doesn't have organization
+  // Show overlay if: user is merchant, not loading, and has no organizations
   const isMerchant = role === "MERCHANT";
-  const showOverlay = isMerchant && !orgLoading && !hasOrganisation() && !organisation;
+  const showOverlay = isMerchant && !orgLoading && organisations.length === 0 && !organisation && !hasOrganisation();
 
   // AuthProvider handles routing, so if we reach here, user is authenticated
   // and has access to the current route
 
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
-          "--header-height": "calc(var(--spacing) * 12)",
-        } as React.CSSProperties
-      }
-    >
-      <AppSidebar variant="inset" />
-      <SidebarInset>
-        <SiteHeader />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            {children}
+    <>
+      <SidebarProvider
+        style={
+          {
+            "--sidebar-width": "calc(var(--spacing) * 72)",
+            "--header-height": "calc(var(--spacing) * 12)",
+          } as React.CSSProperties
+        }
+      >
+        <AppSidebar variant="inset" />
+        <SidebarInset>
+          <SiteHeader />
+          <div className={`flex flex-1 flex-col ${showOverlay ? "pointer-events-none opacity-50" : ""}`}>
+            <div className="@container/main flex flex-1 flex-col gap-2">
+              {children}
+            </div>
           </div>
-        </div>
-      </SidebarInset>
+        </SidebarInset>
+      </SidebarProvider>
       {showOverlay && <OrganizationOverlay />}
-    </SidebarProvider>
+    </>
   );
 }
 

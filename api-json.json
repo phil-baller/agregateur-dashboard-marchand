@@ -52,6 +52,56 @@
         ]
       }
     },
+    "/auth/test/{email}": {
+      "get": {
+        "operationId": "AuthController_test",
+        "parameters": [
+          {
+            "name": "email",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IAppErrorDto"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IAppErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
     "/auth/logout": {
       "post": {
         "operationId": "AuthController_logout",
@@ -414,44 +464,24 @@
       "post": {
         "operationId": "UsersController_verifyIdentity",
         "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponseDto"
-                }
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyIdentityDto"
               }
             }
           }
         },
-        "summary": "Verify user identity (KYC)",
-        "tags": [
-          "Users"
-        ]
-      }
-    },
-    "/notifications/events/{ref}": {
-      "get": {
-        "operationId": "NotificationsController_sendEvents",
-        "parameters": [
-          {
-            "name": "ref",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
         "responses": {
           "200": {
             "description": ""
           }
         },
+        "summary": "Verify user identity (KYC)",
         "tags": [
-          "Notifications"
+          "Users"
         ]
       }
     },
@@ -808,68 +838,6 @@
         "tags": [
           "beneficiaires"
         ]
-      },
-      "get": {
-        "operationId": "BeneficiairesController_findAll",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "size",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Beneficiaires retrieved successfully"
-          }
-        },
-        "summary": "Get all beneficiaires",
-        "tags": [
-          "beneficiaires"
-        ]
-      }
-    },
-    "/beneficiaires/me": {
-      "get": {
-        "operationId": "BeneficiairesController_findByUser",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "size",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Beneficiaires retrieved successfully"
-          }
-        },
-        "summary": "Get beneficiaire by user",
-        "tags": [
-          "beneficiaires"
-        ]
       }
     },
     "/beneficiaires/{organisation}": {
@@ -1104,6 +1072,76 @@
             "in": "query",
             "schema": {
               "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payments retrieved successfully"
+          }
+        },
+        "summary": "Get  payments",
+        "tags": [
+          "payments"
+        ]
+      }
+    },
+    "/payments/export": {
+      "get": {
+        "operationId": "PaymentsController_export",
+        "parameters": [
+          {
+            "name": "transaction_type",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PAYMENT",
+                "DIRECT_PAYMENT",
+                "TRANSFERT",
+                "RECHARGE"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "INIT",
+                "INEXECUTION",
+                "PENDING",
+                "COMPLETE",
+                "FAILED",
+                "TIMEOUT"
+              ]
+            }
+          },
+          {
+            "name": "dateFrom",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "dateTo",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "organisation_id",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -1559,14 +1597,23 @@
     "/analytics/overview": {
       "get": {
         "operationId": "AnalyticsController_getOverview",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "organisation_id",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Analytics overview retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AnalyticsOverviewResponseDto"
+                  "$ref": "#/components/schemas/OrganisationStatsResponseDto"
                 }
               }
             }
@@ -1622,6 +1669,46 @@
         ]
       }
     },
+    "/transferts": {
+      "get": {
+        "operationId": "TransfertsController_findAll",
+        "parameters": [
+          {
+            "name": "organisation_id",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "size",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transferts retrieved successfully"
+          }
+        },
+        "summary": "Get all organisation transferts",
+        "tags": [
+          "transferts"
+        ]
+      }
+    },
     "/transferts/send-otp": {
       "get": {
         "operationId": "TransfertsController_forgotPassword",
@@ -1657,38 +1744,6 @@
           }
         },
         "summary": "Initialise a mobile transfert",
-        "tags": [
-          "transferts"
-        ]
-      }
-    },
-    "/transferts": {
-      "get": {
-        "operationId": "TransfertsController_findAll",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "size",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "transferts retrieved successfully"
-          }
-        },
-        "summary": "Get all transferts",
         "tags": [
           "transferts"
         ]
@@ -1841,6 +1896,8 @@
             "type": "string",
             "enum": [
               "INIT",
+              "BLOCKED",
+              "REJECTED",
               "COMPLETE",
               "PENDING"
             ]
@@ -1849,9 +1906,6 @@
             "type": "string",
             "description": "Firebase notification token of the user"
           },
-          "balance": {
-            "type": "number"
-          },
           "role": {
             "type": "string",
             "enum": [
@@ -1859,9 +1913,6 @@
               "MERCHANT",
               "ADMIN"
             ]
-          },
-          "kyc_status": {
-            "type": "string"
           },
           "name": {
             "type": "string"
@@ -1882,9 +1933,7 @@
           "code_phone",
           "status",
           "firebaseNotificationToken",
-          "balance",
           "role",
-          "kyc_status",
           "name",
           "surname",
           "birth_day"
@@ -1964,6 +2013,32 @@
             "type": "string"
           }
         }
+      },
+      "VerifyIdentityDto": {
+        "type": "object",
+        "properties": {
+          "fullname": {
+            "type": "string"
+          },
+          "user_picture": {
+            "type": "string",
+            "format": "binary",
+            "description": "file"
+          },
+          "first_face": {
+            "type": "string",
+            "format": "binary",
+            "description": "file"
+          },
+          "second_face": {
+            "type": "string",
+            "format": "binary",
+            "description": "file"
+          }
+        },
+        "required": [
+          "fullname"
+        ]
       },
       "CreateOrganisationDto": {
         "type": "object",
@@ -2272,23 +2347,38 @@
           "updatedAt"
         ]
       },
-      "AnalyticsOverviewResponseDto": {
+      "OrganisationStatsResponseDto": {
         "type": "object",
         "properties": {
           "totalTransactions": {
-            "type": "number"
+            "type": "number",
+            "description": "Total des transactions de type payment pour cette organisation",
+            "example": 150
           },
           "totalAmount": {
-            "type": "number"
+            "type": "number",
+            "description": "Montant total des transactions complètes (en XAF)",
+            "example": 5000000
           },
           "successfulTransactions": {
-            "type": "number"
+            "type": "number",
+            "description": "Nombre de transactions réussies (statut COMPLETE)",
+            "example": 142
           },
           "failedTransactions": {
-            "type": "number"
+            "type": "number",
+            "description": "Nombre de transactions échouées (statut FAILED)",
+            "example": 8
           },
-          "commissions": {
-            "type": "number"
+          "successRate": {
+            "type": "number",
+            "description": "Taux de succès en pourcentage",
+            "example": 94.67
+          },
+          "averageAmount": {
+            "type": "number",
+            "description": "Montant moyen par transaction complète (en XAF)",
+            "example": 35211.27
           }
         },
         "required": [
@@ -2296,7 +2386,8 @@
           "totalAmount",
           "successfulTransactions",
           "failedTransactions",
-          "commissions"
+          "successRate",
+          "averageAmount"
         ]
       },
       "AnalyticsGraphDataResponseDto": {
@@ -2343,6 +2434,9 @@
             "type": "string"
           },
           "service_mobile_code": {
+            "type": "string"
+          },
+          "organisation_id": {
             "type": "string"
           }
         },

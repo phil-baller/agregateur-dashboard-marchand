@@ -35,6 +35,16 @@ export const BeneficiariesTable = ({
   const columns = useMemo<ColumnDef<Beneficiary>[]>(
     () => [
       {
+        id: "id",
+        header: "ID",
+        cell: ({ row, table }) => {
+          const pageIndex = table.getState().pagination.pageIndex;
+          const pageSize = table.getState().pagination.pageSize;
+          const rowIndex = pageIndex * pageSize + row.index + 1;
+          return <div className="font-medium">{rowIndex}</div>;
+        },
+      },
+      {
         accessorKey: "name",
         header: "Name",
         cell: ({ row }) => (
@@ -49,13 +59,6 @@ export const BeneficiariesTable = ({
             {row.original.code_phone && `${row.original.code_phone} `}
             {row.original.phone}
           </div>
-        ),
-      },
-      {
-        accessorKey: "country_id",
-        header: "Country ID",
-        cell: ({ row }) => (
-          <div className="font-mono text-sm">{row.original.country_id}</div>
         ),
       },
     ],

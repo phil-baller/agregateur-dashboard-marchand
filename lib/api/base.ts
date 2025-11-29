@@ -65,6 +65,12 @@ const handleApiError = (error: IAppErrorDto["error"], status: number): void => {
 
     // Show appropriate toast based on status code
     const statusCode = error.status_code || status;
+    
+    // Check if this is a business logic error (has error code that's not a standard HTTP error)
+    const isBusinessLogicError = error.code && 
+      !["UNAUTHORIZED", "FORBIDDEN", "NOT_FOUND", "INTERNAL_ERROR"].includes(error.code) &&
+      error.code !== "UNKNOWN_ERROR";
+    
     if (statusCode === 401) {
       toast.error("Authentication required", {
         description: errorMessage,
@@ -73,6 +79,9 @@ const handleApiError = (error: IAppErrorDto["error"], status: number): void => {
       toast.error("Access denied", {
         description: errorMessage,
       });
+    } else if (statusCode === 404 && isBusinessLogicError) {
+      // For business logic errors with 404 status (like insufficient balance), show message directly
+      toast.error(errorMessage);
     } else if (statusCode === 404) {
       toast.error("Not found", {
         description: errorMessage,
@@ -82,7 +91,7 @@ const handleApiError = (error: IAppErrorDto["error"], status: number): void => {
         description: errorMessage || "An error occurred on the server",
       });
     } else {
-      // For 4xx errors (like 400), show the error message directly
+      // For other 4xx errors (like 400), show the error message directly
       toast.error(errorMessage);
     }
   } catch {
@@ -222,4 +231,7 @@ export const apiPatch = <T>(endpoint: string, data?: unknown): Promise<T> => {
 export const apiDelete = <T>(endpoint: string): Promise<T> => {
   return apiRequest<T>(endpoint, { method: "DELETE" });
 };
+
+// Export apiRequest for advanced use cases (e.g., blob responses, custom headers)
+export { apiRequest };
 

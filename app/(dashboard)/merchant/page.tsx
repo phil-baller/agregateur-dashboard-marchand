@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,12 +34,18 @@ const formatNumber = (num: number): string => {
 export default function MerchantPage() {
   const { overview, isLoading, fetchOverview } = useAnalyticsStore();
   const { isAuthenticated } = useAuthStore();
+  const hasFetchedRef = useRef(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !hasFetchedRef.current) {
+      hasFetchedRef.current = true;
       fetchOverview();
     }
-  }, [isAuthenticated, fetchOverview]);
+    // Reset ref when auth state changes
+    if (!isAuthenticated) {
+      hasFetchedRef.current = false;
+    }
+  }, []);
 
   const analyticsCards = [
     {

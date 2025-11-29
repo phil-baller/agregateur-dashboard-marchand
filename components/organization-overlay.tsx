@@ -25,23 +25,47 @@ export const OrganizationOverlay = () => {
     isLoading,
     error,
     clearError,
-    fetchMyOrganisations,
   } = useOrganisationsStore();
   const [libelle, setLibelle] = useState("");
   const [webSite, setWebSite] = useState("");
   const [description, setDescription] = useState("");
+  const [mounted, setMounted] = useState(false);
 
-  // Check if organization exists before showing overlay
+  // Ensure we're on the client side and inject styles for high z-index
   useEffect(() => {
-    // If we have organizations, we shouldn't be showing this overlay
-    // But let's double-check by fetching if we're not sure
-    if (organisations.length === 0 && !isLoading) {
-      fetchMyOrganisations();
+    setMounted(true);
+    
+    // Inject styles to ensure overlay and content have high z-index
+    const styleId = "organization-overlay-styles";
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement("style");
+      style.id = styleId;
+      style.textContent = `
+        [data-slot="dialog-overlay"] {
+          z-index: 9998 !important;
+        }
+        [data-slot="dialog-content"] {
+          z-index: 9999 !important;
+        }
+      `;
+      document.head.appendChild(style);
     }
-  }, [organisations.length, isLoading, fetchMyOrganisations]);
+    
+    return () => {
+      // Cleanup: remove style on unmount
+      const styleElement = document.getElementById(styleId);
+      if (styleElement) {
+        styleElement.remove();
+      }
+    };
+  }, []);
 
   // Don't render if organization already exists
-  if (hasOrganisation() || organisation) {
+  if (hasOrganisation() || organisation || organisations.length > 0) {
+    return null;
+  }
+
+  if (!mounted) {
     return null;
   }
 
@@ -60,18 +84,14 @@ export const OrganizationOverlay = () => {
     }
 
     try {
-      // Double-check organization doesn't exist before creating
-      if (hasOrganisation() || organisation) {
-        toast.error("Organization already exists");
-        return;
-      }
-
       await createOrganisation({
         libelle: libelle.trim(),
         web_site: webSite.trim(),
         description: description.trim() || undefined,
       });
       toast.success("Organization created successfully!");
+      // Form will be cleared and overlay will disappear automatically
+      // as the store updates and the layout re-renders
       setLibelle("");
       setWebSite("");
       setDescription("");
@@ -82,92 +102,94 @@ export const OrganizationOverlay = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="container mx-auto max-w-2xl px-4">
-        <Dialog open={true}>
-          <DialogContent showCloseButton={false} className="sm:max-w-[600px]">
-            <DialogHeader>
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                <Building2 className="h-6 w-6 text-primary" />
-              </div>
-              <DialogTitle className="text-2xl">
-                Create Your Organization
-              </DialogTitle>
-              <DialogDescription className="text-base">
-                Before you can access the merchant dashboard, you need to create
-                an organization. This will be used to manage your payments,
-                transfers, and other merchant activities.
-              </DialogDescription>
-            </DialogHeader>
+    <Dialog open={true} modal={true}>
+        <DialogContent 
+          showCloseButton={false} 
+          className="sm:max-w-[600px]"
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
+        <DialogHeader>
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+            <Building2 className="h-6 w-6 text-primary" />
+          </div>
+          <DialogTitle className="text-2xl">
+            Create Your Organization
+          </DialogTitle>
+          <DialogDescription className="text-base">
+            Before you can access the merchant dashboard, you need to create
+            an organization. This will be used to manage your payments,
+            transfers, and other merchant activities.
+          </DialogDescription>
+        </DialogHeader>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="libelle">
-                  Organization Name <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="libelle"
-                  placeholder="Enter organization name"
-                  value={libelle}
-                  onChange={(e) => setLibelle(e.target.value)}
-                  disabled={isLoading}
-                  required
-                />
-              </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="libelle">
+              Organization Name <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="libelle"
+              placeholder="Enter organization name"
+              value={libelle}
+              onChange={(e) => setLibelle(e.target.value)}
+              disabled={isLoading}
+              required
+            />
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="web_site">
-                  Website <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="web_site"
-                  type="url"
-                  placeholder="https://example.com"
-                  value={webSite}
-                  onChange={(e) => setWebSite(e.target.value)}
-                  disabled={isLoading}
-                  required
-                />
-              </div>
+          <div className="space-y-2">
+            <Label htmlFor="web_site">
+              Website <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="web_site"
+              type="url"
+              placeholder="https://example.com"
+              value={webSite}
+              onChange={(e) => setWebSite(e.target.value)}
+              disabled={isLoading}
+              required
+            />
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Description (Optional)</Label>
-                <Input
-                  id="description"
-                  placeholder="Enter organization description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description (Optional)</Label>
+            <Input
+              id="description"
+              placeholder="Enter organization description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
 
-              {error && (
-                <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                  {error}
-                </div>
+          {error && (
+            <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              type="submit"
+              disabled={isLoading || !libelle.trim() || !webSite.trim()}
+              className="w-full sm:w-auto"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create Organization"
               )}
-
-              <DialogFooter>
-                <Button
-                  type="submit"
-                  disabled={isLoading || !libelle.trim() || !webSite.trim()}
-                  className="w-full sm:w-auto"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    "Create Organization"
-                  )}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </div>
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

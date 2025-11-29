@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiPatch, apiDelete } from "@/lib/api/base";
+import { apiGet, apiPost, apiPatch, apiDelete, apiRequest } from "@/lib/api/base";
 import { getCurrentOrganisationId } from "@/lib/api/config";
 import type {
   NewCreatePaymentDto,
@@ -109,6 +109,27 @@ export const paymentsController = {
     id: string
   ): Promise<TransactionStatusResponseDto> => {
     return apiPatch<TransactionStatusResponseDto>(`/payments/${id}/fail`);
+  },
+
+  exportPayments: async (params: {
+    transaction_type: "PAYMENT" | "DIRECT_PAYMENT" | "TRANSFERT" | "RECHARGE";
+    status: "INIT" | "INEXECUTION" | "PENDING" | "COMPLETE" | "FAILED" | "TIMEOUT";
+    dateFrom: number;
+    dateTo: number;
+    organisation_id: string;
+  }): Promise<Blob> => {
+    const organisationId = getCurrentOrganisationId();
+    const queryParams = {
+      ...params,
+      organisation_id: params.organisation_id || organisationId || undefined,
+    };
+    
+    // Use apiRequest directly to handle blob response
+    return apiRequest<Blob>("/payments/export", {
+      method: "GET",
+      params: queryParams,
+      responseType: "blob",
+    });
   },
 };
 

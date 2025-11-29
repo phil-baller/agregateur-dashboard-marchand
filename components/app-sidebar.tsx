@@ -18,6 +18,7 @@ import {
   IconMoon,
   IconDeviceDesktop,
   IconUser,
+  IconCode,
 } from "@tabler/icons-react"
 
 import { useAuthStore, type UserRole } from "@/stores/auth.store"
@@ -236,6 +237,27 @@ export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
         <NavMain items={navigation.navMain} role={role} />
       </SidebarContent>
       <SidebarFooter>
+        {process.env.NEXT_PUBLIC_DEVELOPER_DOCS_URL && (
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                tooltip="Developer Docs"
+                className="w-full"
+              >
+                <a
+                  href={process.env.NEXT_PUBLIC_DEVELOPER_DOCS_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Open Developer Documentation"
+                >
+                  <IconCode className="size-4" />
+                  <span>Developer Docs</span>
+                </a>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        )}
         <ThemeSwitcher />
         <NavUser user={userData} />
       </SidebarFooter>

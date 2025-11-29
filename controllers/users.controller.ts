@@ -1,5 +1,6 @@
-import { apiGet, apiDelete, apiPost, apiPatch } from "@/lib/api/base";
-import type { UserDto, LoginResponseDto } from "@/types/api";
+import { apiGet, apiDelete, apiPost, apiPatch, apiRequest } from "@/lib/api/base";
+import { getCurrentOrganisationId } from "@/lib/api/config";
+import type { UserDto, LoginResponseDto, VerifyIdentityDto } from "@/types/api";
 
 export const usersController = {
   getCurrentUser: async (): Promise<UserDto> => {
@@ -22,8 +23,18 @@ export const usersController = {
     await apiPatch("/users/notification");
   },
 
-  verifyIdentity: async (): Promise<LoginResponseDto> => {
-    return apiPost<LoginResponseDto>("/users/verify-identity");
+  verifyIdentity: async (data: FormData, organisationId?: string): Promise<LoginResponseDto> => {
+    const orgId = organisationId || getCurrentOrganisationId();
+    if (orgId) {
+      data.append("organisation_id", orgId);
+    }
+    return apiRequest<LoginResponseDto>("/users/verify-identity", {
+      method: "POST",
+      data,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   },
 };
 
