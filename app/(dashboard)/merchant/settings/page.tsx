@@ -589,10 +589,6 @@ export default function SettingsPage() {
             <FileText className="mr-2 h-4 w-4" />
             Reports
           </TabsTrigger>
-          <TabsTrigger value="kyc">
-            <Shield className="mr-2 h-4 w-4" />
-            KYC Verification
-          </TabsTrigger>
         </TabsList>
 
         {/* Company Information Tab */}
@@ -787,91 +783,6 @@ export default function SettingsPage() {
                   </>
                 )}
               </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* KYC Verification Tab */}
-        <TabsContent value="kyc" className="space-y-6">
-          <Card className="animate-slide-up">
-            <CardHeader>
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  KYC Verification
-                </CardTitle>
-                <CardDescription>
-                  Verify your identity by submitting required documents
-                </CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmitKyc} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="kyc-fullname">Full Name *</Label>
-                  <Input
-                    id="kyc-fullname"
-                    type="text"
-                    value={kycFullname}
-                    onChange={(e) => setKycFullname(e.target.value)}
-                    placeholder="Enter your full name"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="kyc-user-picture">User Picture</Label>
-                  <Input
-                    id="kyc-user-picture"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setKycUserPicture(e.target.files?.[0] || null)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Upload your profile picture
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="kyc-first-face">First Face Photo</Label>
-                  <Input
-                    id="kyc-first-face"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setKycFirstFace(e.target.files?.[0] || null)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Upload first face verification photo
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="kyc-second-face">Second Face Photo</Label>
-                  <Input
-                    id="kyc-second-face"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setKycSecondFace(e.target.files?.[0] || null)}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Upload second face verification photo
-                  </p>
-                </div>
-                <Button
-                  type="submit"
-                  disabled={isSubmittingKyc || !kycFullname.trim()}
-                  className="w-full md:w-auto"
-                >
-                  {isSubmittingKyc ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <Shield className="mr-2 h-4 w-4" />
-                      Submit Verification
-                    </>
-                  )}
-                </Button>
-              </form>
             </CardContent>
           </Card>
         </TabsContent>

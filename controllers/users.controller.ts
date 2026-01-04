@@ -23,6 +23,10 @@ export const usersController = {
     await apiPatch("/users/notification");
   },
 
+  updateUserPhoneNumber: async (phone: string, code_phone: string): Promise<UserDto> => {
+    return apiPatch<UserDto>("/users", { phone, code_phone });
+  },
+
   verifyIdentity: async (data: FormData, organisationId?: string): Promise<LoginResponseDto> => {
     const orgId = organisationId || getCurrentOrganisationId();
     if (orgId) {

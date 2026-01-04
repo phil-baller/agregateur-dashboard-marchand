@@ -27,7 +27,9 @@ import {
     Loader2,
     Edit,
     Save,
+    ArrowLeft,
 } from "lucide-react";
+import Link from "next/link";
 import { toast } from "sonner";
 
 type KYCStatus = "NOT_SUBMITTED" | "PENDING" | "VERIFIED";
@@ -76,28 +78,28 @@ export default function AccountPage() {
 
         setIsUpdatingPhone(true);
         try {
-            // Call the update user API
-            const response = await fetch("/api/users/update", {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ phone: phone.trim() }),
-            });
+            // Call the update user API using the controller
+            const updatedUser = await usersController.updateUserPhoneNumber(
+                phone.trim(),
+                user?.code_phone || "237"
+            );
 
-            if (response.ok) {
-                // Update user in store
-                if (user) {
-                    setUser({ ...user, phone: phone.trim() });
-                }
-                toast.success("Phone number updated successfully");
-                setIsEditingPhone(false);
-            } else {
-                toast.error("Failed to update phone number");
+            // Update user in store
+            if (updatedUser) {
+                setUser(updatedUser);
+            } else if (user) {
+                setUser({ ...user, phone: phone.trim() });
             }
+
+            toast.success("Phone number updated successfully");
+            setIsEditingPhone(false);
         } catch (error) {
             console.error("Failed to update phone:", error);
-            toast.error("Failed to update phone number");
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to update phone number. Please try again."
+            );
         } finally {
             setIsUpdatingPhone(false);
         }
@@ -125,7 +127,7 @@ export default function AccountPage() {
                 formData.append("second_face", kycSecondFace);
             }
 
-            const response = await usersController.verifyIdentity(formData, organisation?.id);
+            const response = await usersController.verifyIdentity(formData, user?.id);
 
             // Update user in auth store if response contains user data
             if (response.user) {
@@ -185,8 +187,13 @@ export default function AccountPage() {
 
     return (
         <div className="flex flex-col gap-6 p-6 animate-fade-in">
-            <div className="flex items-center justify-between">
-                <div>
+            <div className="flex items-center gap-4">
+                <Button variant="ghost" size="icon" asChild>
+                    <Link href="/merchant">
+                        <ArrowLeft className="h-4 w-4" />
+                    </Link>
+                </Button>
+                <div className="flex-1">
                     <h1 className="text-3xl font-bold">Account</h1>
                     <p className="text-muted-foreground">
                         Manage your account settings and identity verification
