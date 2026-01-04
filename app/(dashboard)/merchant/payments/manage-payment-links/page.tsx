@@ -120,7 +120,7 @@ export default function ManagePaymentLinksPage() {
 
   const handleDeleteConfirm = async () => {
     if (!paymentToDelete) return;
-    
+
     const confirmValue = paymentToDelete.reference || paymentToDelete.id;
     if (deleteConfirmText !== confirmValue) {
       toast.error("Confirmation text does not match");
@@ -150,18 +150,18 @@ export default function ManagePaymentLinksPage() {
         description: data.description,
       };
       const response = await createPayment(payload);
-      
+
       // Extract payment data from response
       // Response structure: { payment: { data: { launch_url, reference, amount, currency } } }
       const paymentData = (response as unknown as { payment?: { data?: { launch_url?: string; reference?: string; amount?: number; currency?: string } } })?.payment?.data;
-      
+
       if (paymentData) {
         setCreatedPaymentData(paymentData);
         setPaymentLinkModalOpen(true);
       } else {
         toast.success("Payment link created successfully");
       }
-      
+
       setIsCreatePaymentOpen(false);
       paymentForm.reset();
       await fetchPayments({ page: pagination.page, size: pagination.size });
@@ -315,7 +315,6 @@ export default function ManagePaymentLinksPage() {
         payment={selectedPayment}
         open={sheetOpen}
         onOpenChange={setSheetOpen}
-        onDelete={handleDeleteClick}
       />
 
       {/* Payment Link Success Modal */}

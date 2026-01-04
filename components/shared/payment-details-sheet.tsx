@@ -57,7 +57,6 @@ interface PaymentDetailsSheetProps {
   payment: Payment | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onDelete?: (id: string, reference?: string) => void;
 }
 
 const statusColors: Record<string, string> = {
@@ -73,7 +72,6 @@ export const PaymentDetailsSheet = ({
   payment,
   open,
   onOpenChange,
-  onDelete,
 }: PaymentDetailsSheetProps) => {
   const [copied, setCopied] = React.useState<string | null>(null);
 
@@ -127,9 +125,9 @@ export const PaymentDetailsSheet = ({
                   <p className="text-2xl font-bold">
                     {typeof payment.amount === "number"
                       ? new Intl.NumberFormat("en-US", {
-                          style: "currency",
-                          currency: "XOF",
-                        }).format(payment.amount)
+                        style: "currency",
+                        currency: "XOF",
+                      }).format(payment.amount)
                       : payment.amount}
                   </p>
                 </div>
@@ -232,12 +230,6 @@ export const PaymentDetailsSheet = ({
                             )}
                           </Button>
                         </div>
-                      </div>
-                    )}
-                    {payment.beneficiary.id && (
-                      <div className="space-y-1.5">
-                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">ID</div>
-                        <p className="text-xs font-mono text-muted-foreground">{payment.beneficiary.id}</p>
                       </div>
                     )}
                   </CardContent>
@@ -406,24 +398,7 @@ export const PaymentDetailsSheet = ({
             </Card>
           </div>
 
-          {/* Actions */}
-          {onDelete && (
-            <>
-              <Separator />
-              <div className="pt-4">
-                <Button
-                  variant="destructive"
-                  className="w-full"
-                  onClick={() => {
-                    onDelete(payment.id, payment.reference);
-                    onOpenChange(false);
-                  }}
-                >
-                  Delete Payment
-                </Button>
-              </div>
-            </>
-          )}
+          {/* Actions section removed - delete option disabled */}
         </div>
       </SheetContent>
     </Sheet>

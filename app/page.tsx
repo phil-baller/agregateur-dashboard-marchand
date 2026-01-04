@@ -20,7 +20,9 @@ import {
   Globe,
   Sun,
   Moon,
+  Code,
 } from "lucide-react";
+import { config } from "@/lib/config";
 
 export default function Home() {
   const router = useRouter();
@@ -38,7 +40,7 @@ export default function Home() {
     if (hasRedirected.current) {
       return;
     }
-    
+
     // If user is authenticated, redirect to their dashboard
     if (isAuthenticated && user) {
       hasRedirected.current = true;
@@ -125,6 +127,12 @@ export default function Home() {
             <span className="text-xl font-bold">FastPay</span>
           </div>
           <div className="flex items-center gap-2">
+            <Button variant="ghost" asChild>
+              <a href={config.docsUrl} target="_blank" rel="noopener noreferrer">
+                <Code className="mr-2 h-4 w-4" />
+                Developer Docs
+              </a>
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -226,7 +234,7 @@ export default function Home() {
       {/* CTA Section */}
       <section className="relative border-t bg-primary py-20 text-primary-foreground md:py-32 overflow-hidden">
         {/* Grid Pattern Background */}
-        <div 
+        <div
           className="absolute inset-0 opacity-[0.15]"
           style={{
             backgroundImage: `
@@ -281,6 +289,9 @@ export default function Home() {
               <span className="text-lg font-semibold">FastPay</span>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-muted-foreground">
+              <a href={config.docsUrl} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+                Developer Docs
+              </a>
               <Link href="/help" className="hover:text-foreground">
                 Help Center
               </Link>
