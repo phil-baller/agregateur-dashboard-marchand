@@ -60,13 +60,13 @@ interface DirectPaymentFormData {
 
 export default function PaymentsPage() {
   const { payments, isLoading, pagination, fetchPayments, deletePayment, createDirectPayment } = usePaymentsStore();
-  const { 
-    groupedPayments, 
-    isLoading: isGroupedPaymentsLoading, 
-    pagination: groupedPagination, 
-    fetchGroupedPayments, 
-    deleteGroupedPayment, 
-    createGroupedPayment 
+  const {
+    groupedPayments,
+    isLoading: isGroupedPaymentsLoading,
+    pagination: groupedPagination,
+    fetchGroupedPayments,
+    deleteGroupedPayment,
+    createGroupedPayment
   } = useGroupedPaymentsStore();
   const { services, fetchServices } = useMobileServicesStore();
   const { isAuthenticated } = useAuthStore();
@@ -170,7 +170,7 @@ export default function PaymentsPage() {
 
   const handleDeleteConfirm = async () => {
     if (!paymentToDelete) return;
-    
+
     const confirmValue = paymentToDelete.reference || paymentToDelete.id;
     if (deleteConfirmText !== confirmValue) {
       toast.error("Confirmation text does not match");
@@ -233,7 +233,7 @@ export default function PaymentsPage() {
 
   const handleDeleteGroupedConfirm = async () => {
     if (!groupedPaymentToDelete) return;
-    
+
     const confirmValue = groupedPaymentToDelete.reference || groupedPaymentToDelete.id;
     if (deleteConfirmText !== confirmValue) {
       toast.error("Confirmation text does not match");
@@ -300,125 +300,125 @@ export default function PaymentsPage() {
     <div className="flex flex-col gap-6 p-6 animate-fade-in">
       {/* Header Section - Only show when no payments */}
       {!hasPayments && (
-      <div className="flex flex-col items-center justify-center gap-4 rounded-lg bg-primary/10 p-8 text-center animate-slide-up">
-        <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary/20">
-          <Zap className="h-8 w-8 text-primary" />
-        </div>
-        <h1 className="text-3xl font-bold">Start receiving payments</h1>
-        <p className="max-w-2xl text-muted-foreground">
-          Create your first payment link and start accepting payments from your
-          customers in just a few minutes.
-        </p>
+        <div className="flex flex-col items-center justify-center gap-4 rounded-lg bg-primary/10 p-8 text-center animate-slide-up">
+          <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-primary/20">
+            <Zap className="h-8 w-8 text-primary" />
+          </div>
+          <h1 className="text-3xl font-bold">Start receiving payments</h1>
+          <p className="max-w-2xl text-muted-foreground">
+            Create your first payment link and start accepting payments from your
+            customers in just a few minutes.
+          </p>
           <div className="flex flex-wrap gap-4 justify-center">
-          <Dialog open={isDirectPaymentOpen} onOpenChange={setIsDirectPaymentOpen}>
-            <DialogTrigger asChild>
-              <Button size="lg">
-                <Phone className="mr-2 h-4 w-4" />
-                Direct Payment
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Initialize Direct Payment</DialogTitle>
-                <DialogDescription>
-                  Initialize a direct payment to a specific phone number.
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={directPaymentForm.handleSubmit(handleCreateDirectPayment)} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="direct-amount">Amount *</Label>
-                  <Input
-                    id="direct-amount"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="Enter amount"
-                    {...directPaymentForm.register("amount", {
-                      required: "Amount is required",
-                      min: { value: 0.01, message: "Amount must be greater than 0" },
-                      valueAsNumber: true,
-                    })}
-                  />
-                  {directPaymentForm.formState.errors.amount && (
-                    <p className="text-sm text-destructive">
-                      {directPaymentForm.formState.errors.amount.message}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="direct-phone">Phone Number *</Label>
-                  <Input
-                    id="direct-phone"
-                    type="tel"
-                    placeholder="Enter phone number"
-                    {...directPaymentForm.register("phone", {
-                      required: "Phone number is required",
-                    })}
-                  />
-                  {directPaymentForm.formState.errors.phone && (
-                    <p className="text-sm text-destructive">
-                      {directPaymentForm.formState.errors.phone.message}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="service-mobile-code">Mobile Service</Label>
-                  <Select
-                    value={directPaymentForm.watch("service_mobile_code") || ""}
-                    onValueChange={(value) =>
-                      directPaymentForm.setValue("service_mobile_code", value)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select mobile service (optional)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {services.map((service) => (
-                        <SelectItem key={service.id} value={service.code_prefix}>
-                          {service.name} ({service.code_prefix})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="direct-description">Description *</Label>
-                  <Textarea
-                    id="direct-description"
-                    placeholder="Enter payment description"
-                    {...directPaymentForm.register("description", {
-                      required: "Description is required",
-                    })}
-                  />
-                  {directPaymentForm.formState.errors.description && (
-                    <p className="text-sm text-destructive">
-                      {directPaymentForm.formState.errors.description.message}
-                    </p>
-                  )}
-                </div>
-                <DialogFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsDirectPaymentOpen(false)}
-                    disabled={isCreatingDirectPayment}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={isCreatingDirectPayment}>
-                    {isCreatingDirectPayment ? "Initializing..." : "Initialize Payment"}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
+            <Dialog open={isDirectPaymentOpen} onOpenChange={setIsDirectPaymentOpen}>
+              <DialogTrigger asChild>
+                <Button size="lg">
+                  <Phone className="mr-2 h-4 w-4" />
+                  Direct Payment
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Initialize Direct Payment</DialogTitle>
+                  <DialogDescription>
+                    Initialize a direct payment to a specific phone number.
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={directPaymentForm.handleSubmit(handleCreateDirectPayment)} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="direct-amount">Amount *</Label>
+                    <Input
+                      id="direct-amount"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="Enter amount"
+                      {...directPaymentForm.register("amount", {
+                        required: "Amount is required",
+                        min: { value: 0.01, message: "Amount must be greater than 0" },
+                        valueAsNumber: true,
+                      })}
+                    />
+                    {directPaymentForm.formState.errors.amount && (
+                      <p className="text-sm text-destructive">
+                        {directPaymentForm.formState.errors.amount.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="direct-phone">Phone Number *</Label>
+                    <Input
+                      id="direct-phone"
+                      type="tel"
+                      placeholder="Enter phone number"
+                      {...directPaymentForm.register("phone", {
+                        required: "Phone number is required",
+                      })}
+                    />
+                    {directPaymentForm.formState.errors.phone && (
+                      <p className="text-sm text-destructive">
+                        {directPaymentForm.formState.errors.phone.message}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="service-mobile-code">Mobile Service</Label>
+                    <Select
+                      value={directPaymentForm.watch("service_mobile_code") || ""}
+                      onValueChange={(value) =>
+                        directPaymentForm.setValue("service_mobile_code", value)
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select mobile service (optional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {services.map((service) => (
+                          <SelectItem key={service.id} value={service.code_prefix}>
+                            {service.name} ({service.code_prefix})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="direct-description">Description *</Label>
+                    <Textarea
+                      id="direct-description"
+                      placeholder="Enter payment description"
+                      {...directPaymentForm.register("description", {
+                        required: "Description is required",
+                      })}
+                    />
+                    {directPaymentForm.formState.errors.description && (
+                      <p className="text-sm text-destructive">
+                        {directPaymentForm.formState.errors.description.message}
+                      </p>
+                    )}
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsDirectPaymentOpen(false)}
+                      disabled={isCreatingDirectPayment}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isCreatingDirectPayment}>
+                      {isCreatingDirectPayment ? "Initializing..." : "Initialize Payment"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
 
-          <Button size="lg" asChild>
-            <Link href="/merchant/payments/manage-payment-links">
-              <Settings className="mr-2 h-4 w-4" />
-              Manage Payment Links
-            </Link>
-          </Button>
+            <Button size="lg" asChild>
+              <Link href="/merchant/payments/manage-payment-links">
+                <Settings className="mr-2 h-4 w-4" />
+                Manage Payment Links
+              </Link>
+            </Button>
           </div>
         </div>
       )}
@@ -447,12 +447,12 @@ export default function PaymentsPage() {
                   animationFillMode: "both",
                 }}
               >
-          <CardHeader>
+                <CardHeader>
                   <div
                     className={`mb-2 flex h-10 w-10 items-center justify-center rounded ${card.bgColor}`}
                   >
                     <Icon className={`h-5 w-5 ${card.iconColor}`} />
-            </div>
+                  </div>
                   <CardDescription>{card.title}</CardDescription>
                   {isLoading ? (
                     <Skeleton className="h-8 w-24" />
@@ -461,16 +461,16 @@ export default function PaymentsPage() {
                       {formatNumber(card.value)}
                     </CardTitle>
                   )}
-          </CardHeader>
-          <CardContent>
+                </CardHeader>
+                <CardContent>
                   <p className="text-sm text-muted-foreground">
                     {card.description}
                   </p>
-          </CardContent>
-        </Card>
+                </CardContent>
+              </Card>
             );
           })}
-            </div>
+        </div>
       )}
 
       {/* Payments Table with Tabs */}
@@ -599,8 +599,8 @@ export default function PaymentsPage() {
                 </>
               )}
               {activeTab === "grouped" && (
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   onClick={() => setIsGroupedPaymentOpen(true)}
                 >
                   <Users className="mr-2 h-4 w-4" />
@@ -664,7 +664,6 @@ export default function PaymentsPage() {
         payment={selectedPayment}
         open={sheetOpen}
         onOpenChange={setSheetOpen}
-        onDelete={handleDeleteClick}
       />
 
       {/* Grouped Payment Details Sheet */}
@@ -772,59 +771,59 @@ export default function PaymentsPage() {
 
       {/* Help Section - Only show when no payments */}
       {!hasPayments && (
-      <div className="flex flex-col gap-4 rounded-lg border p-6 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h3 className="text-lg font-semibold">Need help getting started?</h3>
-          <p className="text-muted-foreground">
-            Consult our guides and documentation to get started quickly.
-          </p>
-          <Link href="/support" className="mt-2 text-primary hover:underline">
-            Contact support →
-          </Link>
+        <div className="flex flex-col gap-4 rounded-lg border p-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h3 className="text-lg font-semibold">Need help getting started?</h3>
+            <p className="text-muted-foreground">
+              Consult our guides and documentation to get started quickly.
+            </p>
+            <Link href="/support" className="mt-2 text-primary hover:underline">
+              Contact support →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">Getting started guide</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-xs">
+                  Learn the basics step by step
+                </CardDescription>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">API documentation</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-xs">
+                  Explore our integration guides
+                </CardDescription>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">Video tutorials</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-xs">
+                  Watch step-by-step guides
+                </CardDescription>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">FAQ</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-xs">
+                  Find answers to common questions
+                </CardDescription>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Getting started guide</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-xs">
-                Learn the basics step by step
-              </CardDescription>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">API documentation</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-xs">
-                Explore our integration guides
-              </CardDescription>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">Video tutorials</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-xs">
-                Watch step-by-step guides
-              </CardDescription>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm">FAQ</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-xs">
-                Find answers to common questions
-              </CardDescription>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
       )}
     </div>
   );

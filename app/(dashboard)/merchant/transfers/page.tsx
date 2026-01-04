@@ -15,6 +15,7 @@ import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { Plus, Building2, Smartphone, RefreshCw, Shield } from "lucide-react";
 import Link from "next/link";
 import type { CreateTransfertDto } from "@/types/api";
+import { config } from "@/lib/config";
 
 interface Transfer {
   id: string;
@@ -103,8 +104,10 @@ export default function TransfersPage() {
             <Plus className="mr-2 h-4 w-4" />
             Create new transfer
           </Button>
-          <Button variant="outline" size="lg">
-            Learn more
+          <Button variant="outline" size="lg" asChild>
+            <a href={config.docsTransfersUrl} target="_blank" rel="noopener noreferrer">
+              Learn more
+            </a>
           </Button>
         </div>
       </div>
@@ -209,9 +212,14 @@ export default function TransfersPage() {
           <p className="text-muted-foreground">
             Find out how to set up and optimize your withdrawals.
           </p>
-          <Link href="/support" className="mt-2 text-primary hover:underline">
+          <a
+            href={config.telegramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-block text-primary hover:underline"
+          >
             Contact support →
-          </Link>
+          </a>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <Card>

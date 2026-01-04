@@ -107,9 +107,9 @@ export const TransferDetailsSheet = ({
                   <p className="text-2xl font-bold">
                     {typeof transfer.amount === "number"
                       ? new Intl.NumberFormat("en-US", {
-                          style: "currency",
-                          currency: "XOF",
-                        }).format(transfer.amount)
+                        style: "currency",
+                        currency: "XOF",
+                      }).format(transfer.amount)
                       : transfer.amount}
                   </p>
                 </div>
@@ -209,26 +209,6 @@ export const TransferDetailsSheet = ({
                             onClick={() => handleCopy(transfer.beneficiary!.phone!, "recipient-phone")}
                           >
                             {copied === "recipient-phone" ? (
-                              <Check className="h-3.5 w-3.5 text-green-600" />
-                            ) : (
-                              <Copy className="h-3.5 w-3.5" />
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                    {transfer.beneficiary.id && (
-                      <div className="space-y-1.5">
-                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Beneficiary ID</div>
-                        <div className="flex items-center gap-2">
-                          <p className="text-xs font-mono text-muted-foreground break-all">{transfer.beneficiary.id}</p>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 shrink-0"
-                            onClick={() => handleCopy(transfer.beneficiary!.id, "beneficiary-id")}
-                          >
-                            {copied === "beneficiary-id" ? (
                               <Check className="h-3.5 w-3.5 text-green-600" />
                             ) : (
                               <Copy className="h-3.5 w-3.5" />
