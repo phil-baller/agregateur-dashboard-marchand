@@ -41,3 +41,6 @@ api-json.json
 *.tsbuildinfo
 next-env.d.ts
 .nvii/
+
+# cursor
+.cursor
