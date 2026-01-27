@@ -8,49 +8,75 @@ import { Button } from "@/components/ui/button";
 import { LandingNav } from "@/components/landing/landing-nav";
 import { LandingHero } from "@/components/landing/landing-hero";
 import { LandingStats } from "@/components/landing/landing-stats";
-import { HoverEffect } from "@/components/ui/card-hover-effect";
+import { ProgressiveBlur } from "@/components/ui/progressive-blur";
+import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
 import { FocusCards } from "@/components/ui/focus-cards";
 import { ParallaxScroll } from "@/components/ui/parallax-scroll";
 import { motion } from "motion/react";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  Zap,
+  CreditCard,
+  Code2,
+  BarChart3,
+  MessageCircle,
+} from "lucide-react";
 import { config } from "@/lib/config";
+import {
+  InstantPaymentsContent,
+  PaymentMethodsContent,
+  ApiIntegrationsContent,
+  AnalyticsContent,
+  SupportContent,
+} from "@/components/landing/bento-feature-contents";
 
-const FEATURE_ITEMS = [
+/** Features from project-description: Instant payments, Multiple payment methods, API-first, Analytics, Support */
+const BENTO_FEATURES = [
   {
-    title: "Instant payments",
-    description:
-      "Receive payments in real time with our low-latency processing pipeline.",
-    link: "/register",
+    name: "Instant payments",
+    description: "Real-time processing so you get paid as soon as your customers pay.",
+    href: "/register",
+    cta: "Get started",
+    Icon: Zap,
+    className: "col-span-3 lg:col-span-2",
+    background: <InstantPaymentsContent />,
   },
   {
-    title: "Secure & reliable",
-    description:
-      "End-to-end encryption and robust infrastructure so your money stays safe.",
-    link: "/register",
-  },
-  {
-    title: "Multiple payment methods",
+    name: "Multiple payment methods",
     description:
       "Mobile Money, cards, bank transfers, and digital wallets in one platform.",
-    link: "/register",
+    href: "/register",
+    cta: "Learn more",
+    Icon: CreditCard,
+    className: "col-span-3 lg:col-span-1",
+    background: <PaymentMethodsContent />,
   },
   {
-    title: "API-first integration",
-    description:
-      "API keys, webhooks, and developer docs so you can integrate in hours.",
-    link: config.docsUrl,
+    name: "API-first integration",
+    description: "API keys, webhooks, and developer docs so you can integrate in hours.",
+    href: config.docsUrl,
+    cta: "View docs",
+    Icon: Code2,
+    className: "col-span-3 lg:col-span-1",
+    background: <ApiIntegrationsContent />,
   },
   {
-    title: "Real-time analytics",
-    description:
-      "Transaction and performance metrics to track growth and success.",
-    link: "/register",
+    name: "Analytics",
+    description: "Transaction and performance metrics to track growth and success.",
+    href: "/register",
+    cta: "Explore",
+    Icon: BarChart3,
+    className: "col-span-3 lg:col-span-1",
+    background: <AnalyticsContent />,
   },
   {
-    title: "24/7 support",
-    description:
-      "Help center, Telegram, WhatsApp, and documentation when you need it.",
-    link: "/help",
+    name: "Support",
+    description: "Help center, Telegram, WhatsApp, and documentation when you need it.",
+    href: "/help",
+    cta: "Get help",
+    Icon: MessageCircle,
+    className: "col-span-3 lg:col-span-2",
+    background: <SupportContent />,
   },
 ];
 
@@ -97,7 +123,12 @@ export default function Home() {
       <LandingNav />
       <main>
         <LandingHero />
-        <LandingStats />
+        <section
+          className="relative z-10 -mt-24 -mb-16 h-40 w-full overflow-hidden bg-transparent"
+          aria-hidden
+        >
+          <ProgressiveBlur position="bottom" height="100%" />
+        </section>
 
         <section
           id="features"
@@ -119,7 +150,11 @@ export default function Home() {
               </p>
             </motion.div>
             <div className="mx-auto max-w-6xl pt-12">
-              <HoverEffect items={FEATURE_ITEMS} className="max-w-5xl mx-auto" />
+              <BentoGrid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                {BENTO_FEATURES.map((feature, idx) => (
+                  <BentoCard key={feature.name} {...feature} />
+                ))}
+              </BentoGrid>
             </div>
           </div>
         </section>

@@ -41,8 +41,8 @@ export function LandingHero() {
     <section
       id="hero"
       className={cn(
-        "relative overflow-hidden border-b",
-        "bg-linear-to-b from-background to-muted",
+        "relative overflow-hidden",
+        "bg-background",
       )}
     >
       <div className="relative pb-24 pt-12 md:pb-32 lg:pb-56 lg:pt-44">
@@ -112,6 +112,7 @@ export function LandingHero() {
             zoom={6}
             className="h-full w-full"
           />
+
         </div>
       </div>
     </section>
