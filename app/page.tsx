@@ -61,15 +61,6 @@ const BENTO_FEATURES = [
     background: <ApiIntegrationsContent />,
   },
   {
-    name: "Analytics",
-    description: "Transaction and performance metrics to track growth and success.",
-    href: "/register",
-    cta: "Explore",
-    Icon: BarChart3,
-    className: "col-span-3 lg:col-span-1",
-    background: <AnalyticsContent />,
-  },
-  {
     name: "Support",
     description: "Help center, Telegram, WhatsApp, and documentation when you need it.",
     href: "/help",
@@ -159,106 +150,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section
-          id="showcase"
-          className="relative border-b bg-muted/20 py-20 md:py-28"
-        >
-          <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.5 }}
-              className="mx-auto max-w-2xl text-center"
-            >
-              <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">
-                Built for modern businesses
-              </h2>
-              <p className="text-lg text-muted-foreground">
-                Instant payments, analytics, and API-first tools in one place.
-              </p>
-            </motion.div>
-            <div className="mx-auto max-w-5xl pt-12">
-              <FocusCards cards={SHOWCASE_CARDS} />
-            </div>
-          </div>
-        </section>
-
-        <section className="relative border-b py-12 md:py-16">
-          <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.5 }}
-              className="mx-auto max-w-2xl text-center"
-            >
-              <h2 className="mb-4 text-2xl font-bold tracking-tight md:text-3xl">
-                Payment infrastructure at global scale
-              </h2>
-              <p className="text-muted-foreground">
-                Trusted by businesses everywhere to move money reliably.
-              </p>
-            </motion.div>
-            <div className="mx-auto max-w-5xl pt-8">
-              <ParallaxScroll images={PARALLAX_IMAGES} className="rounded-xl" />
-            </div>
-          </div>
-        </section>
-
-        <section
-          id="cta"
-          className="relative border-t bg-primary py-20 text-primary-foreground md:py-28"
-        >
-          <div
-            className="absolute inset-0 opacity-[0.12]"
-            style={{
-              backgroundImage: `
-                linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px)
-              `,
-              backgroundSize: "48px 48px",
-            }}
-          />
-          <div className="container relative z-10 mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="mx-auto max-w-2xl text-center"
-            >
-              <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">
-                Ready to get started?
-              </h2>
-              <p className="mb-8 text-lg text-primary-foreground/90">
-                Join thousands of businesses using FastPay to accept payments and
-                grow revenue.
-              </p>
-              <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  asChild
-                  className="w-full rounded-lg sm:w-auto"
-                >
-                  <Link href="/register">
-                    Create free account
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full rounded-lg border-primary-foreground/20 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 sm:w-auto"
-                  asChild
-                >
-                  <Link href="/login">Sign in</Link>
-                </Button>
-              </div>
-            </motion.div>
-          </div>
-        </section>
+    
 
         <footer className="border-t bg-muted/30 py-12">
           <div className="container mx-auto px-4">
